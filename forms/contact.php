@@ -37,6 +37,8 @@
   $contact->add_message( $_POST['email'], 'Email');
   $contact->add_message( $_POST['message'], 'Message', 10);
 
-  echo $contact->send();
   $contact->recaptcha_secret_key = '6LdkzFkaAAAAABX_jsHEo2uWzzUa26aqwZM4bz07';
+  $contact->honeypot = $_POST['first_name'];
+  echo $contact->send();
+  
 ?>
