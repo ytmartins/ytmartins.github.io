@@ -37,6 +37,11 @@ try {
         await page.screenshot({path:`${out}/${filename}`,fullPage:true});report.screenshots.push(filename);
         // Render untouched baseline through the same HTTP server/browser/viewport.
         const baseline=await context.newPage();await baseline.goto(`${base}/codex_handoff/reference_v6_1/${route}`);await settle(baseline);
+        // Apply only the owner-requested removals to the immutable V6.1 comparison.
+        if(route==='index.html') await baseline.evaluate(()=>{
+          document.querySelectorAll('.hero-aside,.timeline-actions,.scenario-disclaimer,.contact-footer p,.footer-links').forEach(e=>e.remove());
+          const footer=document.querySelector('.footer-inner');footer.replaceChildren(footer.querySelector('strong'));
+        });
         await baseline.screenshot({path:`${out}/baseline-${filename}`,fullPage:true});
         const text=async p=>p.locator('main').innerText();
         check(`${route} copy fidelity ${width}`,await text(page)===await text(baseline));
@@ -70,24 +75,15 @@ try {
   }
   const ctx=await browser.newContext({viewport:{width:1440,height:900}});const page=await ctx.newPage();
   await page.clock.install();await page.goto(`${base}/dist/`);
-  check('initial Discover',await page.locator('#spatialStory').getAttribute('data-stage')==='0');
-  await page.screenshot({path:`${out}/home-discover.png`});
-  await page.clock.runFor(950);
-  for(let stage=1;stage<=4;stage++){await page.clock.runFor(1780);check(`autoplay stage ${stage}`,await page.locator('#spatialStory').getAttribute('data-stage')===String(stage));}
-  check('auto-stop Understand',await page.locator('#stagePause').innerText()==='Play');
-  await page.clock.runFor(10000);check('no loop',await page.locator('#spatialStory').getAttribute('data-stage')==='4');
+  check('initial Understand',await page.locator('#spatialStory').getAttribute('data-stage')==='4');
+  check('story motion paused',await page.locator('#spatialStory').evaluate(e=>e.classList.contains('motion-paused')));
+  await page.clock.runFor(15000);check('scene remains static',await page.locator('#spatialStory').getAttribute('data-stage')==='4');
   for(let stage=0;stage<5;stage++) {
-    await page.locator(`[data-step="${stage}"]`).click();check(`manual stage ${stage}`,await page.locator(`[data-step="${stage}"]`).getAttribute('aria-current')==='step');
-    await page.screenshot({path:`${out}/stage-${stage}.png`});
+    await page.locator(`[data-step="${stage}"]`).click();
+    check(`manual stage ${stage}`,await page.locator(`[data-step="${stage}"]`).getAttribute('aria-current')==='step');
+    await page.clock.runFor(8000);check(`stage ${stage} holds`,await page.locator('#spatialStory').getAttribute('data-stage')===String(stage));
   }
-  await page.locator('#stageReplay').click();check('replay resets',await page.locator('#spatialStory').getAttribute('data-stage')==='0');
-  await page.locator('#stagePause').click();await page.clock.runFor(5000);check('pause holds',await page.locator('#spatialStory').getAttribute('data-stage')==='0');
-  await page.locator('#stagePause').click();await page.clock.runFor(1780);check('play resumes',await page.locator('#spatialStory').getAttribute('data-stage')==='1');
-  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
-  await page.clock.runFor(8000);check('hidden tab holds',await page.locator('#spatialStory').getAttribute('data-stage')==='1');
-  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
-  await page.clock.runFor(1780);check('visible tab resumes',await page.locator('#spatialStory').getAttribute('data-stage')==='2');
-  await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#spatialStory[data-stage="4"]').waitFor();check('dynamic reduced motion stops',await page.locator('#spatialStory').getAttribute('data-stage')==='4');
+  await page.emulateMedia({reducedMotion:'reduce'});
   await page.locator('[data-step="0"]').click();await page.clock.runFor(8000);check('reduced motion manual selection holds',await page.locator('#spatialStory').getAttribute('data-stage')==='0');
   await page.goto(`${base}/dist/labs.html`);
   for(let mask=0;mask<8;mask++) {
