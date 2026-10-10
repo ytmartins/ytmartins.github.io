@@ -48,11 +48,8 @@
       ['UNDERSTAND','Turn insight into a next step','Translate spatial evidence into a question worth validating with people.','Understand the context before proposing an action.']
     ];
     const stageButtons = $$('.stage-button',story);
-    const replay = $('#stageReplay');
-    const pause = $('#stagePause');
-    let stage = reducedMotion.matches ? 4 : 0;
-    let timer = null;
-    let paused = reducedMotion.matches;
+    let stage = 4;
+    story.classList.add('motion-paused');
     const setStage = (s) => {
       stage = Math.max(0,Math.min(s,4));
       story.dataset.stage=String(stage);
@@ -66,36 +63,8 @@
         btn.classList.toggle('completed',i<stage);
       });
     };
-    const stop = () => { if(timer!==null){clearTimeout(timer);timer=null;} };
-    const updatePauseButton = () => {
-      story.classList.toggle('motion-paused', paused);
-      pause.textContent = paused ? 'Play' : 'Pause';
-      pause.setAttribute('aria-pressed',String(paused));
-      pause.setAttribute('aria-label',paused?'Play spatial storytelling':'Pause spatial storytelling');
-    };
-    const tick = () => {
-      stop();
-      if(stage>=4){paused=true;updatePauseButton();return;}
-      if(paused||document.hidden) return;
-      timer = setTimeout(()=>{setStage(stage+1);tick();}, 1780);
-    };
-    const play = () => {
-      if(stage===4) setStage(0);
-      paused=false; updatePauseButton();tick();
-    };
-    stageButtons.forEach(btn=>btn.addEventListener('click',()=>{
-      stop(); paused=true; updatePauseButton(); setStage(Number(btn.dataset.step));
-    }));
-    replay.addEventListener('click',()=>{stop();setStage(0);if(reducedMotion.matches){paused=true;updatePauseButton();}else{paused=false;updatePauseButton();tick();}});
-    pause.addEventListener('click',()=>{paused=!paused;updatePauseButton();paused?stop():play();});
-    document.addEventListener('visibilitychange',()=>{
-      if(document.hidden)stop(); else if(!paused)tick();
-    });
-    reducedMotion.addEventListener?.('change',e=>{
-      if(e.matches){stop();paused=true;setStage(4);updatePauseButton();}
-    });
-    setStage(stage); updatePauseButton();
-    if (!reducedMotion.matches) timer=setTimeout(()=>tick(),950);
+    stageButtons.forEach(btn=>btn.addEventListener('click',()=>setStage(Number(btn.dataset.step))));
+    setStage(stage);
   }
 
   // Labs interactive synthetic layer explorer
