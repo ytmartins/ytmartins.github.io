@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09121b">
+  <meta name="description" content="Yuri Martins Labs: selected research directions and concept experiments in spatial intelligence, infrastructure decision systems and AI-native engineering.">
+  <link rel="canonical" href="https://yurimartins.dev/labs.html">
+  <meta property="og:url" content="https://yurimartins.dev/labs.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="yurimartins.dev">
+  <meta property="og:image" content="https://yurimartins.dev/assets/portrait.webp">
+  <meta property="og:image:alt" content="Yuri Martins">
+  <meta property="og:title" content="Labs · Yuri Martins — Spatial Intelligence">
+  <meta property="og:description" content="Selected research directions in spatial intelligence, infrastructure decision systems and AI-native engineering.">
+  <title>Labs · Yuri Martins — Spatial Intelligence</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preload" as="image" href="assets/terrain.webp" fetchpriority="high">
+  <noscript><style>.hamburger,.timeline-actions,.stage-list,.toggle-list{display:none!important}.top-links{display:flex;position:static;flex-wrap:wrap;width:100%;order:4}.header-inner{flex-wrap:wrap;padding-block:12px}.site-header{height:auto;min-height:82px}</style></noscript>
+  <script src="app.js" defer></script>
+</head>
+<body class="page-labs">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header"><div class="shell header-inner">
+    <a class="brand" href="./" aria-label="yurimartins.dev, home"><img class="brand-mark" src="assets/navigator-code-original.webp" width="839" height="511" alt="" decoding="async"><span class="brand-type">yurimartins<em>.dev</em></span></a>
+    <nav id="siteNav" class="top-links" aria-label="Main navigation"><a href="./">Home</a><a href="./#about">About</a><a href="./#approach">Approach</a><a class="current" aria-current="page" href="labs.html">Labs</a><a href="./#contact">Contact</a></nav>
+    <a class="header-cta" href="https://www.linkedin.com/in/ytmartins/" target="_blank" rel="noopener noreferrer"><span class="status-dot"></span>Let's connect <span class="mini-arrow">↗</span></a>
+    <button class="hamburger" id="menuButton" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="siteNav">☰</button>
+  </div></header>
+  <main id="main" tabindex="-1">
+    <section class="labs-hero"><div class="shell"><div class="eyebrow">Applied research · Selected concepts</div><h1>Exploring what comes <span class="accent">after the map.</span></h1><p>A focused space to investigate how geospatial context, systems architecture and AI-native workflows can support real-world decisions. Research directions first; evidence as experiments mature.</p><div class="labs-intro"><span class="pill">Spatial reasoning</span><span class="pill">Infrastructure intelligence</span><span class="pill">AI-native systems</span><span class="pill">No client-sensitive data</span></div></div></section>
+    <section class="lab-projects" id="directions"><div class="shell"><div class="section-heading">RESEARCH DIRECTIONS · NOT CLIENT DELIVERABLES</div><div class="lab-cards">
+      <article class="lab-card reveal"><div class="lab-card-art terrain" role="img" aria-label="Terrain and illuminated network map texture"></div><div class="lab-card-content"><div class="lab-status">CONCEPT / 01</div><h2>Spatial Context Engine</h2><p>How can proximity, network connectivity and operating constraints become a clearer foundation for business decisions?</p><div class="lab-foot">Potential artifact · Synthetic utility expansion scenario</div></div></article>
+      <article class="lab-card reveal"><div class="lab-card-art infra" role="img" aria-label="Aerial infrastructure mapping texture"></div><div class="lab-card-content"><div class="lab-status">CONCEPT / 02</div><h2>Infrastructure Decision Studio</h2><p>Exploring how asset, risk and operational signals can become understandable decision scenarios for critical infrastructure.</p><div class="lab-foot">Potential artifact · Evidence-driven decision narrative</div></div></article>
+      <article class="lab-card reveal"><div class="lab-card-art network" role="img" aria-label="Abstract connected network over topographic lines"></div><div class="lab-card-content"><div class="lab-status">EXPLORATION / 03</div><h2>AI-Native GIS Workflows</h2><p>Experimenting with specification-driven development, contextual tools and human-reviewed AI workflows for spatial systems.</p><div class="lab-foot">Potential artifact · Evaluated workflow prototype</div></div></article>
+    </div></div></section>
+    <section class="lab-demo" id="demo" aria-labelledby="labDemoTitle"><div class="shell"><div class="lab-demo-inner"><div><div class="eyebrow">Interactive demonstration</div><h2 id="labDemoTitle">A spatial problem is more than its layers<span class="accent">.</span></h2><p>Toggle the conceptual datasets. The map changes to show how infrastructure, demand and constraints contribute different perspectives to the same territory.</p><p id="mapInterpretation" aria-live="polite">Infrastructure, demand and constraints are visible together. Their intersection suggests where to investigate, not what to conclude.</p><div class="toggle-list" role="group" aria-label="Synthetic map layers"><button type="button" class="map-toggle" data-layer="assets" aria-pressed="true"><span class="toggle-dot"></span>Assets</button><button type="button" class="map-toggle" data-layer="demand" aria-pressed="true"><span class="toggle-dot"></span>Demand</button><button type="button" class="map-toggle" data-layer="constraints" aria-pressed="true"><span class="toggle-dot"></span>Constraints</button></div><p class="microprint" style="margin-top:16px">Synthetic scenario · Non-operational illustration · No AI model or live GIS query</p></div>
+        <div class="demo-map" id="labsMap" data-assets="true" data-demand="true" data-constraints="true" role="img" aria-label="Conceptual map with togglable utilities infrastructure, demand zones and spatial constraints">
+          <svg viewBox="0 0 570 365" aria-hidden="true">
+            <defs><radialGradient id="demandGlow"><stop stop-color="#c5f58a" stop-opacity=".35"/><stop offset="1" stop-color="#c5f58a" stop-opacity=".02"/></radialGradient></defs>
+            <g class="demand-layer"><circle cx="330" cy="150" r="98" fill="url(#demandGlow)" stroke="#c5f58a" stroke-opacity=".4" stroke-dasharray="4 7"/><circle cx="433" cy="255" r="55" fill="url(#demandGlow)" stroke="#c5f58a" stroke-opacity=".24" stroke-dasharray="4 7"/><text x="325" y="143" font-size="12" font-weight="700" fill="#edffde">Demand</text><text x="326" y="159" font-size="9" fill="#cbd6c7">Opportunity signals</text></g>
+            <g class="assets-layer"><path d="M56 258 155 217 245 261 310 202 412 190 510 96M155 217 185 124 255 82M310 202 350 310 459 279" fill="none" stroke="#c5f58a" stroke-width="3" stroke-linejoin="round"/><g fill="#c5f58a" stroke="#0b171d" stroke-width="3"><circle cx="56" cy="258" r="6"/><circle cx="155" cy="217" r="6"/><circle cx="245" cy="261" r="6"/><circle cx="310" cy="202" r="8"/><circle cx="412" cy="190" r="6"/><circle cx="510" cy="96" r="6"/><circle cx="185" cy="124" r="6"/><circle cx="255" cy="82" r="6"/><circle cx="350" cy="310" r="6"/><circle cx="459" cy="279" r="6"/></g></g>
+            <g class="constraints-layer"><path d="M207 46 264 71 279 129 243 162 190 139 169 87Z" fill="#a8c8b3" fill-opacity=".15" stroke="#d1dcd0" stroke-opacity=".63" stroke-width="1.6" stroke-dasharray="6 5"/><path d="M407 223 473 208 511 249 486 324 417 305 389 262Z" fill="#b0d7b9" fill-opacity=".15" stroke="#d1dcd0" stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="6 5"/><text x="156" y="45" font-size="10" fill="#d8e3d7">Constraint</text><text x="440" y="341" font-size="10" fill="#d8e3d7">Constraint</text></g>
+          </svg><div class="demo-watermark">ILLUSTRATIVE · SYNTHETIC DATA</div>
+        </div>
+      </div></div></section>
+  </main>
+  <footer class="contact-footer"><div class="shell footer-inner"><div><strong>Learn deliberately. Build with evidence.</strong><p>Independent personal research. No implied vendor affiliation or client endorsement.</p></div><div class="footer-links"><a href="./">← Home</a><a href="https://github.com/ytmartins" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://www.linkedin.com/in/ytmartins/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><span class="microprint">© <span id="copyrightYear">2026</span></span></div></div></footer>
+</body>
+</html>
