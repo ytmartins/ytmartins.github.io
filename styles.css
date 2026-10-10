@@ -160,3 +160,10 @@
   .lab-card p,.lab-demo p{font-size:14px}
   .labs-hero p{font-size:15px}
 }
+
+/* Supporting learning evidence in the existing professional identity block. */
+.learning-credential{margin-top:20px;padding-top:16px;border-top:1px solid var(--stroke);display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+.learning-credential strong{font-size:14px;font-weight:650;color:var(--ink)}
+.learning-credential span{color:var(--muted)}
+.learning-credential a{color:var(--accent);display:inline-flex;align-items:center;min-height:44px}
+
