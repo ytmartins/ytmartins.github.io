@@ -21,7 +21,7 @@ const settle=async page=>{
 };
 try {
   browser=await chromium.launch({headless:true});
-  for(const route of ['index.html','labs.html']) {
+  for(const route of ['index.html']) {
     for(const width of [320,360,390,768,1024,1280,1440,1920]) {
       const context=await browser.newContext({viewport:{width,height:width<640?844:900},reducedMotion:'reduce'});
       const page=await context.newPage();
@@ -39,7 +39,7 @@ try {
         const baseline=await context.newPage();await baseline.goto(`${base}/codex_handoff/reference_v6_1/${route}`);await settle(baseline);
         // Apply only the owner-requested removals to the immutable V6.1 comparison.
         if(route==='index.html') await baseline.evaluate(()=>{
-          document.querySelectorAll('.hero-aside,.timeline-actions,.scenario-disclaimer,.contact-footer p,.footer-links').forEach(e=>e.remove());
+          document.querySelectorAll('.hero-aside,.timeline-actions,.scenario-disclaimer,.contact-footer p,.footer-links,.lab-strip,a[href="labs.html"]').forEach(e=>e.remove());
           const footer=document.querySelector('.footer-inner');footer.replaceChildren(footer.querySelector('strong'));
         });
         await baseline.screenshot({path:`${out}/baseline-${filename}`,fullPage:true});
@@ -92,17 +92,10 @@ try {
   }
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.locator('[data-step="0"]').click();await page.clock.runFor(8000);check('reduced motion manual selection holds',await page.locator('#spatialStory').getAttribute('data-stage')==='0');
-  await page.goto(`${base}/dist/labs.html`);
-  for(let mask=0;mask<8;mask++) {
-    for(const [i,layer] of ['assets','demand','constraints'].entries()) {
-      const button=page.locator(`[data-layer="${layer}"]`);const wanted=String(Boolean(mask&(1<<i)));
-      if(await button.getAttribute('aria-pressed')!==wanted)await button.click();
-      check(`Labs mask ${mask} ${layer}`,await page.locator('#labsMap').getAttribute(`data-${layer}`)===wanted);
-    }
-    check(`Labs mask ${mask} feedback`,(await page.locator('#mapInterpretation').innerText()).length>30);
-  }
+  check('Labs absent from Home',await page.locator('a[href="labs.html"],.lab-strip').count()===0);
+  check('Labs not published',(await page.request.get(`${base}/dist/labs.html`)).status()===404);
   await ctx.close();
-  for(const route of ['index.html','labs.html']) {
+  for(const route of ['index.html']) {
     const keyboard=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});const p=await keyboard.newPage();await p.goto(`${base}/dist/${route}`);
     await p.keyboard.press('Tab');check(`${route} skip link first`,await p.locator('.skip').evaluate(e=>e===document.activeElement));
     await p.keyboard.press('Enter');check(`${route} skip link focuses main`,await p.locator('main').evaluate(e=>e===document.activeElement));
@@ -115,13 +108,13 @@ try {
     await p.screenshot({path:`${out}/${route}-zoom-200.png`,fullPage:true});
     await keyboard.close();
   }
-  for(const route of ['index.html','labs.html']) {
+  for(const route of ['index.html']) {
     const nojs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});const p=await nojs.newPage();await p.goto(`${base}/dist/${route}`);
     check(`${route} no-JS content`,await p.locator('h1').isVisible()&&await p.locator('.contact-footer').isVisible());
-    check(`${route} no-JS mobile Labs navigation`,await p.locator('#siteNav').isVisible());await nojs.close();
+    check(`${route} no-JS mobile navigation`,await p.locator('#siteNav').isVisible());await nojs.close();
   }
   for(const [name,engine] of Object.entries({firefox,webkit})) {
-    try {const b=await engine.launch();const p=await b.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});for(const route of ['index.html','labs.html']){await p.goto(`${base}/dist/${route}`);check(`${name} ${route} smoke`,await p.locator('h1').isVisible()&&await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}await b.close();report.browserMatrix.push({name,status:'PASS'});}catch(e){report.browserMatrix.push({name,status:'NOT RUN',reason:e.message});}
+    try {const b=await engine.launch();const p=await b.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});for(const route of ['index.html']){await p.goto(`${base}/dist/${route}`);check(`${name} ${route} smoke`,await p.locator('h1').isVisible()&&await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}await b.close();report.browserMatrix.push({name,status:'PASS'});}catch(e){report.browserMatrix.push({name,status:'NOT RUN',reason:e.message});}
   }
   check('no runtime/network errors',report.runtime.length===0,report.runtime.join('\n'));
 } finally {
