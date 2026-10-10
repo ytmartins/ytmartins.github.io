@@ -1,0 +1,36 @@
+name: Approved manual Pages release
+on:
+  workflow_dispatch:
+    inputs:
+      approval:
+        description: 'After explicit owner approval, enter yurimartins.dev'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/master' && inputs.approval == 'yurimartins.dev'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/build.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Deploy approved artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
