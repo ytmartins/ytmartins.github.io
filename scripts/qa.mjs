@@ -52,7 +52,7 @@ try {
         const text=async p=>p.locator('main').innerText();
         check(`${route} copy fidelity ${width}`,await text(page)===await text(baseline));
         check(`${route} same-browser pixel fidelity ${width}`,unchanged.equals(await readFile(`${out}/baseline-${filename}`)));
-        if(credential) await page.locator('.person > div').evaluate((e,html)=>e.insertAdjacentHTML('beforeend',html),credential);
+        if(credential) await page.locator('#contact .footer-inner').evaluate((e,html)=>e.insertAdjacentHTML('beforeend',html),credential);
         await baseline.close();
       }
       if([390,1440].includes(width)) {
