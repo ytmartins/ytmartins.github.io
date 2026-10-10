@@ -43,9 +43,16 @@ try {
           const footer=document.querySelector('.footer-inner');footer.replaceChildren(footer.querySelector('strong'));
         });
         await baseline.screenshot({path:`${out}/baseline-${filename}`,fullPage:true});
+        // Exclude only the additive credential when comparing the rest to approved V6.1.
+        let credential;
+        if(route==='index.html') {
+          credential=await page.locator('.learning-credential').evaluate(e=>{const html=e.outerHTML;e.remove();return html;});
+        }
+        const unchanged=await page.screenshot({fullPage:true});
         const text=async p=>p.locator('main').innerText();
         check(`${route} copy fidelity ${width}`,await text(page)===await text(baseline));
-        check(`${route} same-browser pixel fidelity ${width}`,(await readFile(`${out}/${filename}`)).equals(await readFile(`${out}/baseline-${filename}`)));
+        check(`${route} same-browser pixel fidelity ${width}`,unchanged.equals(await readFile(`${out}/baseline-${filename}`)));
+        if(credential) await page.locator('#contact .footer-inner').evaluate((e,html)=>e.insertAdjacentHTML('beforeend',html),credential);
         await baseline.close();
       }
       if([390,1440].includes(width)) {
