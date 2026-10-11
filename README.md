@@ -29,7 +29,7 @@ preview/QA servers first). Generated reports/screenshots are ignored under
 - [Untouched approved handoff](codex_handoff/README_START_HERE.md)
 
 Only `dist/` is publishable. The build copies an allowlist of two pages, CSS, JS
-and seven assets; docs, screenshots, reference material and tooling stay out.
+and eight assets; docs, screenshots, reference material and tooling stay out.
 
 Validation targets `master` and never deploys. Prepared Pages publication is
 manual and master-only. **Current Pages still publishes master root: merging
@@ -40,3 +40,7 @@ Historical Kagerou/Ravenbright attribution: Ariq N / Ravenbright, Apache-2.0.
 Prior template/dependencies were removed after audit; LICENSE.md/history remain.
 Supplied portrait and brand/illustration assets retain their existing ownership;
 the historical template license does not grant rights to personal identity assets.
+
+## Opening motion revision
+
+The owner-requested watercolor opening is documented in [the current storyboard](docs/HERO_STORYBOARD.md) and [reference analysis](docs/WATERCOLOR_MOTION.md). Run `npm run test:story` for the narrative and pigment motion checks. No live AI or client analysis is performed.
