@@ -47,6 +47,13 @@ check(await page.locator('.city-cell.potential').evaluateAll(els=>els.every(e=>N
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   if(width<640)check(await page.locator('.potential-chat').evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('.story-svg').getBoundingClientRect().bottom));
   await page.locator('#askPotential').click();check(await page.locator('#spatialStory').getAttribute('data-stage')==='5');
+  await page.locator('[data-step="4"]').click();
+  await page.locator('#explorePotential').click();
+  check(await page.locator('#spatialStory').getAttribute('data-stage')==='4');
+  check(await page.locator('#spatialStory').getAttribute('data-insight')==='city');
+  check(await page.locator('.potential-chat').isVisible());
+  check(!await page.locator('.decision-card').isVisible());
+  await page.locator('[data-step="5"]').click();
   await page.locator('#validateExpansion').click();
   check(await page.locator('.approval-result').isVisible());
   check(await page.locator('#spatialStory').getAttribute('data-approval')==='approved');
@@ -62,8 +69,16 @@ check(await page.locator('.city-cell.potential').evaluateAll(els=>els.every(e=>N
   check(errors.length===0);await context.close();
  }
  const context=await browser.newContext({viewport:{width:1440,height:1100}});const p=await context.newPage();await p.clock.install();await p.goto('http://127.0.0.1:4173/');await p.locator('#spatialStory').scrollIntoViewIfNeeded();await p.clock.runFor(24100);
+ check(await p.locator('#spatialStory').getAttribute('data-stage')==='4');
+ check(await p.locator('#spatialStory').getAttribute('data-insight')==='city');
+ check(await p.locator('.potential-chat').isVisible());
+ check(!await p.locator('.decision-card').isVisible());
+ await p.clock.runFor(2000);
+ await p.screenshot({path:'docs/qa/potential/insight-city.png'});
+ await p.clock.runFor(4000);
  check(await p.locator('#spatialStory').getAttribute('data-stage')==='5');
- check(await p.locator('.city-cell').first().evaluate(e=>getComputedStyle(e).animationPlayState)==='running');
+ check(await p.locator('[data-step="5"]').innerText().then(t=>t.includes('Decision')));
+ check(await p.locator('.place-notes').textContent().then(t=>t.includes('Your Business')));
  await p.locator('#validateExpansion').hover({force:true});await p.clock.runFor(25000);
  check(await p.locator('#spatialStory').getAttribute('data-stage')==='5');
  await p.mouse.move(0,0);await p.locator('#validateExpansion').focus();await p.clock.runFor(25000);
@@ -71,7 +86,7 @@ check(await page.locator('.city-cell.potential').evaluateAll(els=>els.every(e=>N
  await p.locator('[data-step="0"]').focus();
  await p.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});await p.clock.runFor(20000);check(await p.locator('#spatialStory').getAttribute('data-stage')==='5');
  check(await p.locator('.city-cell').first().evaluate(e=>getComputedStyle(e).animationPlayState)==='paused');
- await p.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});await p.clock.runFor(20000);check(await p.locator('#spatialStory').getAttribute('data-stage')==='0');await context.close();
+ await p.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});await p.clock.runFor(24000);check(await p.locator('#spatialStory').getAttribute('data-stage')==='0');await context.close();
  const live=await browser.newContext({viewport:{width:1440,height:1100}});
  const lp=await live.newPage();const liveErrors=[];lp.on('pageerror',e=>liveErrors.push(e.message));
  await lp.goto('http://127.0.0.1:4173/');await lp.locator('[data-step="5"]').click();

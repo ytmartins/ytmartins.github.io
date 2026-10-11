@@ -46,9 +46,9 @@
       ['REVEAL','Close does not always mean connected.','Access and infrastructure change the meaning of proximity.','Compare relationships, not just locations.'],
       ['FOCUS','Turn context into a working hypothesis.','The connected cluster deserves a closer investigation.','Explore growth using existing connections.'],
       ['INSIGHT','A stronger place to grow.','Compare estimated contribution. Validate the winning hypothesis.','Rank opportunities. Understand the trade-offs.'],
-      ['POTENTIAL','See the bigger opportunity.','Build on strongholds. Validate the growth still within reach.','From a first move to citywide potential.']
+      ['DECISION','You decide the next move.','Approve the recommended project. Turn spatial intelligence into action.','Your decision activates the opportunity.']
     ];
-    const durations = [3000,3500,4000,3500,10000,20000];
+    const durations = [3000,3500,4000,3500,16000,24000];
     const stageButtons = $$('.stage-button',story);
     const play = $('#storyPlay');
     let stage = reducedMotion.matches ? 5 : 0;
@@ -64,6 +64,7 @@
       stage = s;
       decisionHolds.clear();
       delete story.dataset.zoom;
+      delete story.dataset.insight;
       approvalRun++;
       cinematic.forEach(a=>a.cancel());cinematic=[];
       delete story.dataset.approval;
@@ -98,10 +99,16 @@
         started = performance.now();
         timer = setTimeout(()=>{
           timer = null;
+          if(stage===4 && !story.dataset.insight){
+            story.dataset.insight="city";
+            $("#calloutHeading").textContent="See the bigger opportunity.";
+            $("#calloutText").textContent="One recommended project. A wider citywide growth potential.";
+            remaining=9000; sync(); return;
+          }
           setStage((stage+1)%descriptions.length);
           remaining = durations[stage];
           sync();
-        },remaining);
+        },stage===4 && !story.dataset.insight ? Math.max(0,remaining-9000) : remaining);
       }
     };
     stageButtons.forEach(btn=>btn.addEventListener('click',()=>{
@@ -113,8 +120,17 @@
       $('#storyAnnouncement').textContent='Highest estimated contribution: demand within reach, existing access and lower connection cost. Synthetic scenario. Validate capacity, demand and constraints.';
     });
     $('#askPotential').addEventListener('click',()=>{
-      playing=false;sync();story.dataset.manual='true';setStage(5,true);
+      playing=false;sync();story.dataset.manual='true';
+      if(stage!==5){setStage(4,true);story.dataset.insight='city';}
       $('#storyAnnouncement').textContent=$('#potentialAnswer').textContent;
+    });
+    $('#explorePotential').addEventListener('click',()=>{
+      playing=false;sync();story.dataset.manual='true';setStage(4);
+      story.dataset.insight='city';
+      $('#calloutHeading').textContent='See the bigger opportunity.';
+      $('#calloutText').textContent='One recommended project. A wider citywide growth potential.';
+      $('#storyAnnouncement').textContent=$('#potentialAnswer').textContent;
+      $('#askPotential').focus({preventScroll:true});
     });
     const decision=$('.decision-card',story);
     decision.addEventListener('pointerenter',()=>{decisionHolds.add('pointer');sync();});
