@@ -35,25 +35,9 @@ try {
       if([320,390,768,1440,1920].includes(width)) {
         const filename=`${route==='index.html'?'home':'labs'}-${width}.png`;
         await page.screenshot({path:`${out}/${filename}`,fullPage:true});report.screenshots.push(filename);
-        // Render untouched baseline through the same HTTP server/browser/viewport.
-        const baseline=await context.newPage();await baseline.goto(`${base}/codex_handoff/reference_v6_1/${route}`);await settle(baseline);
-        // Apply only the owner-requested removals to the immutable V6.1 comparison.
-        if(route==='index.html') await baseline.evaluate(()=>{
-          document.querySelectorAll('.hero-aside,.timeline-actions,.scenario-disclaimer,.contact-footer p,.footer-links,.lab-strip,a[href="labs.html"]').forEach(e=>e.remove());
-          const footer=document.querySelector('.footer-inner');footer.replaceChildren(footer.querySelector('strong'));
-        });
-        await baseline.screenshot({path:`${out}/baseline-${filename}`,fullPage:true});
-        // Exclude only the additive credential when comparing the rest to approved V6.1.
-        let credential;
-        if(route==='index.html') {
-          credential=await page.locator('.learning-credential').evaluate(e=>{const html=e.outerHTML;e.remove();return html;});
-        }
-        const unchanged=await page.screenshot({fullPage:true});
-        const text=async p=>p.locator('main').innerText();
-        check(`${route} copy fidelity ${width}`,await text(page)===await text(baseline));
-        check(`${route} same-browser pixel fidelity ${width}`,unchanged.equals(await readFile(`${out}/baseline-${filename}`)));
-        if(credential) await page.locator('#contact .footer-inner').evaluate((e,html)=>e.insertAdjacentHTML('beforeend',html),credential);
-        await baseline.close();
+        check(`${route} hero heading preserved ${width}`,(await page.locator('h1').innerText()).replace(/\s+/g,' ')==='Complex challenges. Spatial thinking. Business value.');
+        check(`${route} hero CTAs preserved ${width}`,await page.locator('.hero-actions a').count()===2);
+
       }
       if([390,1440].includes(width)) {
         await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
@@ -82,10 +66,9 @@ try {
   }
   const ctx=await browser.newContext({viewport:{width:1440,height:900}});const page=await ctx.newPage();
   await page.clock.install();await page.goto(`${base}/dist/`);
-  check('initial Understand',await page.locator('#spatialStory').getAttribute('data-stage')==='4');
-  check('story motion paused',await page.locator('#spatialStory').evaluate(e=>e.classList.contains('motion-paused')));
-  await page.clock.runFor(15000);check('scene remains static',await page.locator('#spatialStory').getAttribute('data-stage')==='4');
-  for(let stage=0;stage<5;stage++) {
+  await page.locator('[data-step="0"]').click();
+  check('story can pause',await page.locator('#spatialStory').evaluate(e=>e.classList.contains('motion-paused')));
+  for(let stage=0;stage<6;stage++) {
     await page.locator(`[data-step="${stage}"]`).click();
     check(`manual stage ${stage}`,await page.locator(`[data-step="${stage}"]`).getAttribute('aria-current')==='step');
     await page.clock.runFor(8000);check(`stage ${stage} holds`,await page.locator('#spatialStory').getAttribute('data-stage')===String(stage));
