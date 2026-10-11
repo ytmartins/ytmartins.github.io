@@ -48,7 +48,7 @@
       ['INSIGHT','A stronger place to grow.','Compare estimated contribution. Validate the winning hypothesis.','Rank opportunities. Understand the trade-offs.'],
       ['DECISION','You decide the next move.','Approve the recommended project. Turn spatial intelligence into action.','Your decision activates the opportunity.']
     ];
-    const durations = [3000,3500,4000,3500,16000,24000];
+    const durations = [3000,3500,4000,3500,10500,24000];
     const stageButtons = $$('.stage-button',story);
     const play = $('#storyPlay');
     let stage = reducedMotion.matches ? 5 : 0;
@@ -65,6 +65,8 @@
       decisionHolds.clear();
       delete story.dataset.zoom;
       delete story.dataset.insight;
+      if(s!==5) delete story.dataset.invitation;
+      else story.dataset.invitation=story.dataset.manual==='true'||reducedMotion.matches?'static':'enter';
       approvalRun++;
       cinematic.forEach(a=>a.cancel());cinematic=[];
       delete story.dataset.approval;
@@ -103,12 +105,12 @@
             story.dataset.insight="city";
             $("#calloutHeading").textContent="See the bigger opportunity.";
             $("#calloutText").textContent="One recommended project. A wider citywide growth potential.";
-            remaining=9000; sync(); return;
+            remaining=5500; sync(); return;
           }
           setStage((stage+1)%descriptions.length);
           remaining = durations[stage];
           sync();
-        },stage===4 && !story.dataset.insight ? Math.max(0,remaining-9000) : remaining);
+        },stage===4 && !story.dataset.insight ? Math.max(0,remaining-5500) : remaining);
       }
     };
     stageButtons.forEach(btn=>btn.addEventListener('click',()=>{
@@ -120,17 +122,15 @@
       $('#storyAnnouncement').textContent='Highest estimated contribution: demand within reach, existing access and lower connection cost. Synthetic scenario. Validate capacity, demand and constraints.';
     });
     $('#askPotential').addEventListener('click',()=>{
+      const camera=$('.territory-camera',story),prior=getComputedStyle(camera).transform;
       playing=false;sync();story.dataset.manual='true';
-      if(stage!==5){setStage(4,true);story.dataset.insight='city';}
+      if(stage!==5){
+        setStage(4,true);story.dataset.insight='city';
+        if(!reducedMotion.matches){
+          cinematic.push(camera.animate([{transform:prior},{transform:'scale(.96)'}],{duration:1800,easing:'cubic-bezier(.2,.65,.2,1)',fill:'both'}));sync();
+        }
+      }
       $('#storyAnnouncement').textContent=$('#potentialAnswer').textContent;
-    });
-    $('#explorePotential').addEventListener('click',()=>{
-      playing=false;sync();story.dataset.manual='true';setStage(4);
-      story.dataset.insight='city';
-      $('#calloutHeading').textContent='See the bigger opportunity.';
-      $('#calloutText').textContent='One recommended project. A wider citywide growth potential.';
-      $('#storyAnnouncement').textContent=$('#potentialAnswer').textContent;
-      $('#askPotential').focus({preventScroll:true});
     });
     const decision=$('.decision-card',story);
     decision.addEventListener('pointerenter',()=>{decisionHolds.add('pointer');sync();});
@@ -142,7 +142,7 @@
       const origin=$('.launch-arrow',button).getBoundingClientRect();
       const height=visual.getBoundingClientRect().height;
       const priorCamera=getComputedStyle($('.territory-camera',story)).transform;
-      playing=false;sync();story.dataset.manual='true';setStage(3);
+      playing=false;sync();story.dataset.manual='true';setStage(5);
       const run=approvalRun;
       story.dataset.approval='flying';
       visual.style.minHeight=height+'px';

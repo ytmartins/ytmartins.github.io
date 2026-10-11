@@ -43,6 +43,20 @@ const city=registration([[0,0],[900,0],[900,600],[0,600]]).map(id=>{
  return {id,x,y,revenue,operating,connection,margin:revenue-operating-connection,customers:potentialPremises.length,currentCustomers:premises.filter(p=>p.served).length,status:excluded?'excluded':potentialPremises.length?'potential':served?'established':terrestrial?'unqualified':'neutral',points:h3.cellToBoundary(id).map(p=>xy(p).map(n=>n.toFixed(2)).join(',')).join(' ')};
 });
 const opportunities=city.filter(c=>c.status==='potential');
+// Synthetic annual contribution budgets: priority area is a subset of city total.
+const priorityIds=new Set(cells.map(c=>c.id));
+const priorityTotal=2700;
+const allocate=(pool,target)=>{
+ const weight=pool.reduce((s,c)=>s+c.margin,0);
+ const original=pool.map(c=>c.margin);
+ let assigned=0;
+ pool.forEach((c,i)=>{c.margin=i===pool.length-1?target-assigned:Math.round(target*original[i]/weight);assigned+=c.margin;c.revenue=c.margin+c.operating+c.connection;});
+};
+allocate(opportunities.filter(c=>priorityIds.has(c.id)),priorityTotal);
+allocate(opportunities.filter(c=>!priorityIds.has(c.id)),2800);
+cells.forEach(c=>{const entry=city.find(p=>p.id===c.id);c.margin=entry.margin;c.revenue=entry.revenue;});
+cells.sort((a,b)=>b.margin-a.margin||a.id.localeCompare(b.id));
+const priorityCustomers=opportunities.filter(c=>priorityIds.has(c.id)).reduce((s,c)=>s+c.customers,0);
 const total=opportunities.reduce((sum,c)=>sum+c.margin,0),customers=opportunities.reduce((sum,c)=>sum+c.customers,0);
 const maxVolume=Math.max(...city.map(c=>c.customers),1);
 const displayPremises=inventory.filter(p=>p.served||opportunities.some(c=>c.id===p.id)).map(p=>({...p,status:p.served?'current':'potential'}));
@@ -51,10 +65,10 @@ const svg=`<g class="h3-ranking" aria-label="Synthetic H3 profitability ranking"
 let html=await readFile('index.html','utf8');
 html=html.replace(/<!-- H3 START -->[\s\S]*?<!-- H3 END -->/,`<!-- H3 START -->${svg}<!-- H3 END -->`);
 html=html.replace(/data-best-h3="[^"]*"/,`data-best-h3="${best.id}"`);
-html=html.replace(/<!-- PROFIT -->.*?<!-- END PROFIT -->/,`<!-- PROFIT -->US$ ${best.margin}k / year<!-- END PROFIT -->`);
+html=html.replace(/<!-- PROFIT -->.*?<!-- END PROFIT -->/,`<!-- PROFIT -->US$ ${(priorityTotal/1000).toFixed(1)}M / year<!-- END PROFIT -->`);
 html=html.replace(/<!-- CITY START -->[\s\S]*?<!-- CITY END -->/,`<!-- CITY START -->${citySvg}<!-- CITY END -->`);
-html=html.replace(/<!-- TOTAL -->[\s\S]*?<!-- END TOTAL -->/,`<!-- TOTAL -->US$ ${total}k / year<!-- END TOTAL -->`);
+html=html.replace(/<!-- TOTAL -->[\s\S]*?<!-- END TOTAL -->/,`<!-- TOTAL -->US$ ${(total/1000).toFixed(1)}M / year<!-- END TOTAL -->`);
 html=html.replace(/<!-- CUSTOMERS -->[\s\S]*?<!-- END CUSTOMERS -->/,`<!-- CUSTOMERS -->${customers} potential customers<!-- END CUSTOMERS -->`);
 await writeFile('index.html',html);
-await writeFile('docs/H3_SCENARIO.json',JSON.stringify({synthetic:true,resolution:10,units:'thousand USD / year',formula:'revenue - operating - annualized connection cost',registration:'Arbitrary affine registration to fictional artwork; no real-world location claim',cells,city,total,customers,roofs,displayPremises,maxVolume,currencyBasis:"Synthetic assumptions denominated in USD; no FX conversion"},null,2));
+await writeFile('docs/H3_SCENARIO.json',JSON.stringify({synthetic:true,resolution:10,units:'thousand USD / year',formula:'revenue - operating - annualized connection cost',registration:'Arbitrary affine registration to fictional artwork; no real-world location claim',priorityTotal,priorityCustomers,priorityIds:[...priorityIds],assumptions:'Illustrative business premises. Contribution budgets allocated by synthetic demand/access weights; not a forecast. Priority area is included in city total. H3 green intensity represents eligible customer volume, not contribution.',cells,city,total,customers,roofs,displayPremises,maxVolume,currencyBasis:"Synthetic assumptions denominated in USD; no FX conversion"},null,2));
 console.log(`${cells.length} real H3 cells; best ${best.id}, contribution ${best.margin}k USD/year (synthetic).`);

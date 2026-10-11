@@ -559,5 +559,127 @@
  .connection-flow path,.story[data-approval="approved"] .connection-flow path{stroke-width:6.5}
 }
 
-#explorePotential{display:block;width:100%;min-height:44px;margin-top:8px;padding:8px 0;background:none;border:0;border-top:1px solid #54745d;color:#deffb9;text-align:left;font:500 11px/1.4 Arial,sans-serif;cursor:pointer}
-#explorePotential:focus-visible{outline:2px solid #d7ff8e;outline-offset:2px}
+
+/* Preview refinement: decisive pacing and a soft, registered route halo. */
+.existing-connection:not(.route-halo){stroke-width:4.5}
+.existing-connection.route-halo{stroke:#b7f77e;stroke-width:12;opacity:.34;filter:blur(2.6px);pointer-events:none}
+.story[data-stage="3"] .h3-ranking{opacity:1}
+.story[data-stage="3"] .h3-cell{opacity:0}
+.story[data-stage="4"] .h3-winner{animation:winner-emerge .35s both}
+.story[data-stage="4"] .agent-demo{animation:agent-enter .55s .25s both}
+.story[data-stage="4"] #agentAnswer{animation:agent-enter .5s .6s both}
+.story[data-stage="4"][data-insight="city"] .territory-camera{animation:city-camera 3s cubic-bezier(.2,.65,.2,1) both}
+.story:is([data-stage="5"],[data-stage="4"][data-insight="city"]) .potential-chat{animation:agent-enter .5s .1s both}
+.story:is([data-stage="5"],[data-stage="4"][data-insight="city"]) #potentialAnswer{animation:agent-enter .5s .35s both}
+.story[data-stage="5"] .decision-card{animation:decision-arrive .55s .1s cubic-bezier(.2,.8,.2,1) both}
+/* Approval remains in Decision, reframing the same recommended location. */
+.story[data-stage="5"][data-approval] .territory-camera{animation:none;transform:translate(-20px,35px) scale(1.2)}
+.story[data-stage="5"][data-approval] .potential-chat,
+.story[data-stage="5"][data-approval] .decision-card,
+.story[data-stage="5"][data-approval] .city-key{display:none}
+.story[data-stage="5"][data-approval] .city-potential{opacity:0}
+.story[data-stage="5"][data-approval] .apparent-proximity{opacity:0}
+.story[data-stage="5"][data-approval] .access-comparison,
+.story[data-stage="5"][data-approval] .asset-nodes,
+.story[data-stage="5"][data-approval] .place-notes{opacity:1}
+.story[data-stage="5"][data-approval] .h3-ranking{opacity:1}
+.story[data-stage="5"][data-approval] .h3-cell{opacity:0}
+.story[data-stage="5"][data-approval="approved"] .opportunity-note{opacity:1;animation:none}
+.story[data-stage="5"][data-approval="approved"] .route-halo{opacity:.46}
+@media(max-width:640px){
+ .existing-connection:not(.route-halo){stroke-width:5.8}
+ .existing-connection.route-halo{stroke-width:15;filter:blur(3px);opacity:.38}
+}
+@media(prefers-reduced-motion:reduce){.story[data-stage="5"] .decision-card{animation:none}}
+
+/* The decision invitation arrives during the final camera settle, not after it. */
+@keyframes city-decision-settle{from{transform:translate(-25px,40px) scale(1.25)}to{transform:scale(.96)}}
+.story[data-stage="4"][data-insight="city"] .territory-camera{animation:city-decision-settle 2s cubic-bezier(.2,.65,.2,1) both}
+.story[data-stage="4"][data-insight="city"] .decision-card,
+.story[data-stage="5"] .decision-card{display:block;animation:decision-arrive .4s 1.6s cubic-bezier(.2,.8,.2,1) both}
+.story[data-manual="true"] .decision-card{animation:none}
+.story[data-stage="5"][data-approval] .decision-card{display:none}
+@media(prefers-reduced-motion:reduce){.story[data-stage="5"] .decision-card{animation:none}}
+
+/* One invitation persists across the Insight → Decision boundary. */
+#spatialStory .decision-card{animation:none!important}
+#spatialStory[data-invitation="enter"][data-stage="5"] .decision-card{display:block!important;animation:invitation-once .4s 1.15s cubic-bezier(.2,.8,.2,1) both!important}
+#spatialStory[data-approval] .decision-card{display:none!important}
+@keyframes invitation-once{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* A quiet conversation surface; the messages, rather than the whole card, arrive. */
+.story .agent-demo,.story .potential-chat{animation:none!important}
+.story #agentAnswer,.story #potentialAnswer{animation:none!important}
+.agent-thinking{display:flex;gap:4px;height:14px;align-items:center;position:absolute;margin-top:10px;pointer-events:none;opacity:0}
+.agent-thinking i{width:4px;height:4px;background:#c5f58a;border-radius:50%;animation:thinking-dot .55s ease-in-out infinite alternate}
+.agent-thinking i:nth-child(2){animation-delay:.1s}.agent-thinking i:nth-child(3){animation-delay:.2s}
+@keyframes thinking-dot{to{opacity:.35;transform:translateY(-2px)}}
+@keyframes thinking-window{0%,100%{opacity:0}12%,80%{opacity:1}}
+@keyframes message-arrive{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.story[data-stage="4"] #askLocation{animation:message-arrive .3s both}
+.story[data-stage="4"] .location-thinking{animation:thinking-window .55s .2s both}
+.story[data-stage="4"] #agentAnswer>strong{display:block;animation:message-arrive .3s .7s both}
+.story[data-stage="4"] #agentAnswer>p{animation:message-arrive .3s .85s both}
+.story[data-stage="4"] .agent-metric{animation:message-arrive .3s 1s both}
+.story[data-stage="4"] #agentAnswer>small{animation:message-arrive .3s 1.15s both}
+.story:is([data-stage="5"],[data-insight="city"]) #askPotential{animation:message-arrive .3s both}
+.story:is([data-stage="5"],[data-insight="city"]) .city-thinking{animation:thinking-window .5s .2s both}
+.story:is([data-stage="5"],[data-insight="city"]) #potentialAnswer>strong{display:block;animation:message-arrive .3s .65s both}
+.story:is([data-stage="5"],[data-insight="city"]) .potential-value{animation:message-arrive .3s .85s both}
+.story:is([data-stage="5"],[data-insight="city"]) .potential-count{animation:message-arrive .3s 1.05s both}
+/* A fine dark separator gives the luminous path contrast against painted streets. */
+.existing-connection.route-edge{stroke:#193a30;stroke-width:7.5;opacity:.7;filter:none;pointer-events:none}
+.existing-connection.route-halo{stroke:#bbf38c;stroke-width:10;opacity:.28;filter:blur(1.7px)}
+.existing-connection:not(.route-halo):not(.route-edge){stroke:#c5fa91;stroke-width:4.8}
+.connection-flow path{stroke:#f4ffe6;stroke-width:4;stroke-dasharray:.065 .935;filter:drop-shadow(0 0 2px #c5fa91);animation-duration:2.8s}
+.story[data-approval="approved"] .connection-flow path{stroke-width:4.5}
+@media(max-width:640px){
+ .existing-connection.route-edge{stroke-width:10}
+ .existing-connection.route-halo{stroke-width:13;filter:blur(2px);opacity:.32}
+ .existing-connection:not(.route-halo):not(.route-edge){stroke-width:6.2}
+ .connection-flow path,.story[data-approval="approved"] .connection-flow path{stroke-width:5.5}
+}
+.story[data-manual="true"] :is(#askLocation,#askPotential,#agentAnswer>strong,#agentAnswer>p,.agent-metric,#agentAnswer>small,#potentialAnswer>strong,.potential-value,.potential-count){animation:none!important}
+.story[data-manual="true"] .agent-thinking{display:none}
+#spatialStory[data-stage="4"] .decision-card{display:none!important}
+@keyframes decision-message{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes decision-thinking{0%,100%{opacity:0}12%,80%{opacity:1}}
+.story[data-stage="5"] #askPotential{animation:decision-message .3s both}
+.story[data-stage="5"] .city-thinking{animation:decision-thinking .5s .2s both}
+.story[data-stage="5"] #potentialAnswer>strong{animation:decision-message .3s .65s both}
+.story[data-stage="5"] .potential-value{animation:decision-message .3s .85s both}
+.story[data-stage="5"] .potential-count{animation:decision-message .3s 1.05s both}
+@keyframes decision-breathe{0%,100%{box-shadow:0 12px 30px #0005,0 0 0 5px #c5f58a0b}50%{box-shadow:0 14px 32px #0005,0 0 22px #c5f58a3d}}
+.story[data-stage="5"] .decision-card:before{animation:decision-levitate 4s ease-in-out infinite,decision-breathe 3.6s 1.55s ease-in-out infinite}
+@keyframes decision-hover-pulse{0%,100%{box-shadow:0 12px 30px #0005,0 0 0 1px #e0ffbc66,0 0 15px #c5f58a28;filter:brightness(1)}50%{box-shadow:0 14px 32px #0005,0 0 0 4px #d4ffa62b,0 0 28px #c5f58a55;filter:brightness(1.045)}}
+.story[data-stage="5"] .decision-card:hover:before,.story[data-stage="5"] .decision-card:focus-within:before{animation:decision-hover-pulse 1.5s ease-in-out infinite;animation-play-state:running!important}
+.story[data-stage="5"].effects-paused .decision-card:is(:hover,:focus-within):before{animation-play-state:paused!important}
+.story.effects-paused .decision-card:before{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){
+ #spatialStory[data-invitation="enter"][data-stage="5"] .decision-card{animation:none!important}
+ #spatialStory[data-invitation] .decision-card{animation:none!important}
+ .agent-thinking{display:none}
+ .story :is(#askLocation,#askPotential,#agentAnswer>strong,#agentAnswer>p,.agent-metric,#agentAnswer>small,#potentialAnswer>strong,.potential-value,.potential-count){animation:none!important}
+}
+
+/* Insight explains the local recommendation, then its citywide context. */
+@keyframes insight-hold-camera{from{transform:translate(-20px,35px) scale(1.2)}to{transform:translate(-40px,65px) scale(1.55)}}
+@keyframes answer-city-camera{from{transform:translate(-40px,65px) scale(1.55)}to{transform:scale(.96)}}
+.story[data-stage="4"]:not([data-insight]) .territory-camera{animation:insight-hold-camera 1.4s .65s cubic-bezier(.2,.65,.2,1) both}
+.story[data-stage="4"] .h3-cell{animation-delay:calc(.65s + var(--rank)*.065s)}
+.story[data-stage="4"][data-insight="city"] .territory-camera{animation:answer-city-camera 2s .65s cubic-bezier(.2,.65,.2,1) both}
+.story[data-stage="4"][data-insight="city"] .city-cell{animation-delay:calc(.65s + var(--cell-delay,0s))}
+.story[data-stage="4"][data-insight="city"] .customer-premise{animation-delay:calc(.1s + var(--roof-delay,1s))}
+.decision-question,.decision-answer{display:none}
+.story[data-stage="5"] .city-question,
+.story[data-stage="5"] #potentialAnswer>.city-summary,
+.story[data-stage="5"] #potentialAnswer>.potential-value,
+.story[data-stage="5"] #potentialAnswer>.potential-count{display:none}
+.story[data-stage="5"] .decision-question{display:inline}
+.story[data-stage="5"] .decision-answer{display:block;animation:decision-message .35s .65s both}
+#spatialStory[data-stage="5"]:not([data-approval]) .territory-camera{animation:none;transform:scale(.96);transition:none}
+.decision-answer p{font-size:12px;line-height:1.6;margin:8px 0}
+.decision-answer small{display:block;color:#bfd1c2;font-size:10px;line-height:1.6;border-top:1px solid #54745d;padding-top:8px}
+@keyframes recommend-area{0%{stroke-opacity:.25}45%{stroke-opacity:1}100%{stroke-opacity:.7}}
+.story[data-stage="5"] .retained-opportunity>path{stroke:#e7ffb7;stroke-width:3;animation:recommend-area 1.2s .65s both}
+.story[data-stage="5"][data-manual="true"] .decision-answer{animation:none}
+@media(prefers-reduced-motion:reduce){.story .decision-answer,.story .retained-opportunity>path{animation:none!important}}
