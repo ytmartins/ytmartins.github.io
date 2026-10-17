@@ -684,3 +684,7 @@
 .story[data-stage="5"] .retained-opportunity>path{stroke:#e7ffb7;stroke-width:3;animation:recommend-area 1.2s .65s both}
 .story[data-stage="5"][data-manual="true"] .decision-answer{animation:none}
 @media(prefers-reduced-motion:reduce){.story .decision-answer,.story .retained-opportunity>path{animation:none!important}}
+
+/* Preserve the portrait box; frame the original photo around the face. */
+.person-img{display:block;overflow:hidden}
+.person-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 22%;transform:scale(1.65);transform-origin:50% 15%}
