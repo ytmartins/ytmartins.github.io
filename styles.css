@@ -687,4 +687,4 @@
 
 /* Preserve the portrait box; frame the original photo around the face. */
 .person-img{display:block;overflow:hidden}
-.person-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 22%;transform:scale(1.65);transform-origin:50% 15%}
+.person-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 22%;transform:scale(1.65);transform-origin:43% 7%}
