@@ -6,6 +6,7 @@ body.page-home {
   --quiet: #4a626a;
   --accent: #087767;
   --live-green: #237c40;
+  --navigator-lime: #b3fa3a;
   --stroke: #cbdcda;
   --energy-blue: #218cbd;
   --energy-green: #45a669;
@@ -30,6 +31,13 @@ body.page-home {
 .brand-suffix em {
   grid-area: 1 / 1;
   color: var(--live-green);
+}
+.brand-suffix .suffix-dev {
+  justify-self: start;
+  padding-inline: .10em;
+  border-radius: .2em;
+  background: var(--ink);
+  color: var(--navigator-lime);
 }
 .brand-suffix :is(.suffix-spatial, .suffix-ai) { opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
@@ -102,13 +110,37 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
   vertical-align: middle;
   margin-right: 12px;
 }
-.hero-copy .person-name, .person .eyebrow,
-.hero h1 .accent, .approach-emphasis { color: var(--live-green); }
+.energy-text { color: var(--live-green); }
+@supports (background-clip: text) {
+  @media (forced-colors: none) {
+    .energy-text {
+      background: linear-gradient(100deg, #166784, #237c40 25%, #746009 50%, #237c40 75%, #166784) 30% / 220% 100%;
+      background-clip: text;
+      color: transparent;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .hero-copy .energy-text, .reveal.visible .energy-text {
+        animation: energy-text-sweep 4.2s ease-in-out;
+      }
+    }
+  }
+}
+@keyframes energy-text-sweep {
+  0%, 100% { background-position: 30% 50%; }
+  50% { background-position: 90% 50%; }
+}
+.energy-text::selection { color: var(--ink); }
 .hero-copy .eyebrow::before, .section-heading::before {
   width: 28px;
   background: var(--energy);
 }
 .hero h1 { letter-spacing: -.062em; }
+.hero-headline-line { display: block; }
+.hero-positioning {
+  margin-top: .22em;
+  font-size: .67em;
+  letter-spacing: -.04em;
+}
 .hero-lead { max-width: 45ch; }
 .hero-actions { flex-wrap: wrap; }
 .primary-btn {
