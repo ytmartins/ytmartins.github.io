@@ -198,6 +198,10 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
 .approach { padding-block: 49px; }
 .approach .section-heading { color: var(--quiet); }
 .approach-row { grid-template-columns: minmax(0, 230px) minmax(0, 1fr); }
+.approach-soft { filter: blur(.5px); }
+@media (prefers-contrast: more), (forced-colors: active) {
+  .approach-soft { filter: none; }
+}
 .principles { background: var(--energy) top / 100% 1px no-repeat; padding-top: 15px; }
 .principle-num { border-color: var(--stroke); }
 .contact-footer { border-top: 1px solid var(--stroke); background: linear-gradient(105deg, transparent 55%, #e9f5ee 92%, #f7f4d9); }
