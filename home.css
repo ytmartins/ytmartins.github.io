@@ -6,7 +6,6 @@ body.page-home {
   --quiet: #4a626a;
   --accent: #087767;
   --live-green: #237c40;
-  --navigator-lime: #b3fa3a;
   --stroke: #cbdcda;
   --energy-blue: #218cbd;
   --energy-green: #45a669;
@@ -18,9 +17,9 @@ body.page-home {
 
 .site-header { background: var(--bg); backdrop-filter: none; }
 .brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
 }
 .brand-type { letter-spacing: -.05em; }
 .brand-suffix {
@@ -35,18 +34,9 @@ body.page-home {
   transform-origin: left center;
 }
 .brand-suffix .suffix-dev { opacity: 1; }
-@supports (-webkit-text-stroke: 1px black) and (paint-order: stroke fill) {
-  @media (forced-colors: none) {
-    .brand-suffix .suffix-dev {
-      color: var(--navigator-lime);
-      -webkit-text-stroke: .065em var(--ink);
-      paint-order: stroke fill;
-    }
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   .lettering-ready .brand-suffix em {
-    animation: suffix-layer 12.5s cubic-bezier(.22, .65, .25, 1) calc(var(--layer-delay, 0s) - .6s) infinite;
+    animation: suffix-layer 12.5s ease-in-out calc(var(--layer-delay, 0s) - .6s) infinite;
   }
   .brand-suffix em:nth-child(2) { --layer-delay: -10s; }
   .brand-suffix em:nth-child(3) { --layer-delay: -7.5s; }
@@ -54,9 +44,9 @@ body.page-home {
   .brand-suffix em:nth-child(5) { --layer-delay: -2.5s; }
 }
 @keyframes suffix-layer {
-  0% { opacity: 0; transform: translate(.12em, .82em) skewY(-6deg) scale(.97); }
-  3.6%, 17.5% { opacity: 1; transform: translate(0) skewY(0) scale(1); }
-  21.6%, 100% { opacity: 0; transform: translate(-.1em, -.78em) skewY(5deg) scale(.97); }
+  0% { opacity: 0; transform: translateY(.52em) skewY(-2deg); }
+  4.8%, 20% { opacity: 1; transform: translateY(0) skewY(0); }
+  24.8%, 100% { opacity: 0; transform: translateY(-.52em) skewY(2deg); }
 }
 .top-links a, .socials a { color: var(--muted); }
 .top-links a.current::after { background: var(--energy); }
@@ -111,7 +101,7 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
 @supports (background-clip: text) {
   @media (forced-colors: none) {
     .energy-text {
-      background: linear-gradient(100deg, #166784, #237c40 25%, #746009 50%, #237c40 75%, #166784) 30% / 220% 100%;
+      background: linear-gradient(100deg, #166784, var(--live-green) 25%, #746009 50%, var(--live-green) 75%, #166784) 30% / 220% 100%;
       background-clip: text;
       color: transparent;
     }
@@ -259,7 +249,7 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
 }
 @media (max-width: 640px) {
   .header-inner { width: calc(100% - 20px); gap: 6px; }
-  .brand-mark { width: 32px; height: 32px; border-radius: 6px; }
+  .brand-mark { width: 29px; height: 29px; border-radius: 6px; }
   .brand-type { font-size: clamp(15px, 3.7vw, 22px); }
   .hero-copy .eyebrow { font-size: 16px; }
   .primary-btn, .ghost-btn { padding-inline: 13px; gap: 7px; }
@@ -275,7 +265,7 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
   .header-cta-compact { display: inline; }
 }
 @media (max-width: 370px) {
-  .brand-mark { width: 28px; height: 28px; }
+  .brand-mark { width: 26px; height: 26px; }
   .brand-suffix { font-size: .9em; }
 }
 @media (max-width: 340px) {
