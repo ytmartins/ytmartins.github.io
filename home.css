@@ -35,7 +35,7 @@ body.page-home {
 }
 .brand-suffix .suffix-dev { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
-  .lettering-ready .brand-suffix em {
+  .brand-suffix em {
     animation: suffix-layer 12.5s ease-in-out calc(var(--layer-delay, 0s) - .6s) infinite;
   }
   .brand-suffix em:nth-child(2) { --layer-delay: -10s; }
@@ -106,7 +106,7 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
       color: transparent;
     }
     @media (prefers-reduced-motion: no-preference) {
-      .lettering-ready :where(.hero-copy, .reveal.visible) .energy-text {
+      :where(.hero-copy, .reveal.visible) .energy-text {
         animation: energy-text-sweep 9s ease-in-out infinite;
       }
     }
@@ -130,32 +130,6 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
 }
 .hero-lead { max-width: 45ch; }
 .hero-actions { flex-wrap: wrap; }
-.lettering-toggle:not([hidden]) {
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--stroke);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--muted);
-}
-.lettering-toggle:hover { background: #edf6ef; }
-.lettering-toggle::before {
-  content: "";
-  width: 9px;
-  height: 11px;
-  border-inline: 2px solid currentColor;
-}
-.lettering-toggle[aria-pressed="true"]::before {
-  background: currentColor;
-  border: 0;
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-}
-.lettering-ready.lettering-paused :is(.brand-suffix em, .energy-text) { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) {
-  .lettering-toggle:not([hidden]) { display: none; }
-}
 .primary-btn {
   background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--energy) border-box;
   border-color: transparent;
