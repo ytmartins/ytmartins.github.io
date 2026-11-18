@@ -27,6 +27,16 @@
   document.addEventListener('visibilitychange', updateVisibility);
   updateVisibility();
 
+  const letteringToggle = $('#letteringToggle');
+  if (letteringToggle) {
+    document.body.classList.add('lettering-ready');
+    letteringToggle.hidden = false;
+    letteringToggle.addEventListener('click', () => {
+      const paused = document.body.classList.toggle('lettering-paused');
+      letteringToggle.setAttribute('aria-pressed', String(paused));
+    });
+  }
+
   // Progressive reveal only when motion is allowed. Without JS/reduced motion all content is visible.
   if (!reducedMotion.matches && 'IntersectionObserver' in window) {
     document.body.classList.add('motion-ready');
