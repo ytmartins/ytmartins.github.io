@@ -35,7 +35,7 @@ try {
       if([320,390,768,1440,1920].includes(width)) {
         const filename=`${route==='index.html'?'home':'labs'}-${width}.png`;
         await page.screenshot({path:`${out}/${filename}`,fullPage:true});report.screenshots.push(filename);
-        check(`${route} hero positioning ${width}`,(await page.locator('h1').innerText()).replace(/\s+/g,' ').trim()==='Spatial Thinking. Business Value. GISAI Native Solutions.');
+        check(`${route} hero positioning ${width}`,(await page.locator('h1').innerText()).replace(/\s+/g,' ').trim()==='Spatial Thinking. Business Value. GeoAI Solutions.');
         check(`${route} hero CTAs preserved ${width}`,await page.locator('.hero-actions a').count()===2);
 
       }

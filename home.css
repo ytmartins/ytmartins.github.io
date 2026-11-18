@@ -36,17 +36,17 @@ body.page-home {
 .brand-suffix .suffix-dev { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
   .brand-suffix em {
-    animation: suffix-layer 12.5s ease-in-out calc(var(--layer-delay, 0s) - .6s) infinite;
+    animation: suffix-layer 11.5s ease-in-out calc(var(--layer-delay, 0s) - .52s) infinite;
   }
-  .brand-suffix em:nth-child(2) { --layer-delay: -10s; }
-  .brand-suffix em:nth-child(3) { --layer-delay: -7.5s; }
-  .brand-suffix em:nth-child(4) { --layer-delay: -5s; }
-  .brand-suffix em:nth-child(5) { --layer-delay: -2.5s; }
+  .brand-suffix em:nth-child(2) { --layer-delay: -9.2s; }
+  .brand-suffix em:nth-child(3) { --layer-delay: -6.9s; }
+  .brand-suffix em:nth-child(4) { --layer-delay: -4.6s; }
+  .brand-suffix em:nth-child(5) { --layer-delay: -2.3s; }
 }
 @keyframes suffix-layer {
-  0% { opacity: 0; transform: translateY(.52em) skewY(-2deg); }
-  4.8%, 20% { opacity: 1; transform: translateY(0) skewY(0); }
-  24.8%, 100% { opacity: 0; transform: translateY(-.52em) skewY(2deg); }
+  0% { opacity: 0; transform: translateY(.48em) skewY(-2deg); }
+  4.2%, 20% { opacity: 1; transform: translateY(0) skewY(0); }
+  24.2%, 100% { opacity: 0; transform: translateY(-.48em) skewY(2deg); }
 }
 .top-links a, .socials a { color: var(--muted); }
 .top-links a.current::after { background: var(--energy); }
@@ -101,20 +101,23 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
 @supports (background-clip: text) {
   @media (forced-colors: none) {
     .energy-text {
-      background: linear-gradient(100deg, #166784, var(--live-green) 25%, #746009 50%, var(--live-green) 75%, #166784) 30% / 220% 100%;
+      background:
+        radial-gradient(circle, #ffffff1f 0 .35px, transparent .65px) 0 0 / 3px 4px,
+        radial-gradient(circle, #092e3a33 0 .35px, transparent .65px) 1px 2px / 5px 7px,
+        linear-gradient(100deg, #166784, var(--live-green) 25%, #746009 50%, var(--live-green) 75%, #166784) 30% 50% / 220% 100%;
       background-clip: text;
       color: transparent;
     }
     @media (prefers-reduced-motion: no-preference) {
       :where(.hero-copy, .reveal.visible) .energy-text {
-        animation: energy-text-sweep 9s ease-in-out infinite;
+        animation: energy-text-sweep 7.8s ease-in-out infinite;
       }
     }
   }
 }
 @keyframes energy-text-sweep {
-  0%, 100% { background-position: 30% 50%; }
-  50% { background-position: 90% 50%; }
+  0%, 12%, 92%, 100% { background-position: 0 0, 1px 2px, 30% 50%; }
+  46%, 58% { background-position: 0 0, 1px 2px, 90% 50%; }
 }
 .energy-text::selection { color: var(--ink); }
 .hero-copy .eyebrow::before, .section-heading::before {
