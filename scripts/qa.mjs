@@ -72,30 +72,35 @@ try {
 
   // Observe the painted geometry without adding test-only state to the homepage.
   await page.addInitScript(() => {
-    window.orbitPaint = {centers:new Set(), links:0};
+    window.orbitPaint = {centers:new Set(), anchors:[], particles:[], particleEdge:0};
     const clear = CanvasRenderingContext2D.prototype.clearRect;
     CanvasRenderingContext2D.prototype.clearRect = function (...args) {
       if (this.canvas.id === 'orbit-canvas') {
         window.orbitPaint.centers.clear();
-        window.orbitPaint.links = 0;
+        window.orbitPaint.anchors.length = 0;
+        window.orbitPaint.particles.length = 0;
+        window.orbitPaint.particleEdge = 0;
       }
       return clear.apply(this, args);
     };
     const arc = CanvasRenderingContext2D.prototype.arc;
     CanvasRenderingContext2D.prototype.arc = function (...args) {
       if (this.canvas.id === 'orbit-canvas' && args[2] < .07) {
-        const {e, f} = this.getTransform();
+        const {a, d, e, f} = this.getTransform();
         window.orbitPaint.centers.add(e + ',' + f);
+        const [x, y] = args;
+        window.orbitPaint.particleEdge = Math.max(window.orbitPaint.particleEdge, Math.hypot(x, y));
+        if (this.globalAlpha >= .34 && args[2] > .006) window.orbitPaint.particles.push([a * x + e, d * y + f]);
       }
       return arc.apply(this, args);
     };
-    const stroke = CanvasRenderingContext2D.prototype.stroke;
-    CanvasRenderingContext2D.prototype.stroke = function (...args) {
-      if (this.canvas.id === 'orbit-canvas' && this.lineWidth < .024 &&
-          typeof this.strokeStyle === 'string' && this.strokeStyle.startsWith('rgba')) {
-        window.orbitPaint.links++;
+    const curve = CanvasRenderingContext2D.prototype.quadraticCurveTo;
+    CanvasRenderingContext2D.prototype.quadraticCurveTo = function (cx, cy, x, y) {
+      if (this.canvas.id === 'orbit-canvas') {
+        const {a, d, e, f} = this.getTransform();
+        window.orbitPaint.anchors.push([a * x + e, d * y + f]);
       }
-      return stroke.apply(this, args);
+      return curve.call(this, cx, cy, x, y);
     };
   });
   const start = new Date();
@@ -103,10 +108,12 @@ try {
   await page.clock.pauseAt(new Date(+start + 1000));
   await page.goto(base + '/dist/');
   const orbitState = () => page.evaluate(() => {
-    const {centers, links} = window.orbitPaint;
+    const {centers, anchors, particles, particleEdge} = window.orbitPaint;
     return {
       centers: [...centers].map(center => center.split(',').map(Number)),
-      links,
+      anchors,
+      particles,
+      particleEdge,
       opening: document.documentElement.classList.contains('orbit-opening')
     };
   });
@@ -121,16 +128,47 @@ try {
   check('one sphere settles to the right and reveals copy', !ready.opening && ready.centers.length === 1 &&
     ready.centers[0][0] > 795);
   const art = await page.locator('.spatial-orbit').boundingBox();
-  await page.mouse.move(art.x + art.width / 2 - 31, art.y + art.height / 2 - 32);
+  const cursor = [Math.round(art.x + art.width / 2 - 31), Math.round(art.y + art.height / 2 - 32)];
+  const tethersReach = (state, point, max) => state.centers.length === 1 &&
+    state.anchors.length > 0 && state.anchors.length <= max &&
+    state.anchors.every(([x, y]) => Math.hypot(x - point[0], y - point[1]) < 2);
+  const nearbyParticles = (state, point, inner, outer) => state.particles.filter(([x, y]) => {
+    const distance = Math.hypot(x - point[0], y - point[1]);
+    return distance > inner && distance < outer;
+  });
+  await page.mouse.move(...cursor);
   await page.clock.runFor(540);
   const active = await orbitState();
-  check('pointer connects nearby particles within one sphere', active.centers.length === 1 &&
-    active.links > 0 && active.links <= 6);
+  check('nearby particles connect directly to the pointer within one sphere', tethersReach(active, cursor, 5));
+  const globeRadius = art.height * .35;
+  const restCore = nearbyParticles(ready, cursor, 1, globeRadius * .145);
+  const activeCore = nearbyParticles(active, cursor, 1, globeRadius * .145);
+  check('particles clear a shallow opening around the cursor through the center',
+    restCore.length > 1 && activeCore.length < restCore.length && active.particleEdge < 1.12);
   await page.screenshot({path:out + '/orbit-pointer.png'});
   report.screenshots.push('orbit-pointer.png');
+  const [sphereX, sphereY] = active.centers[0];
+  const rimCursor = [Math.round(sphereX + art.height * .34), Math.round(sphereY - art.height * .07)];
+  await page.mouse.move(...rimCursor);
+  await page.clock.runFor(230);
+  const extended = await orbitState();
+  check('the particle surface stretches beyond the resting silhouette at the rim', extended.particleEdge > 1.14);
+  await page.screenshot({path:out + '/orbit-rim-stretch.png'});
+  report.screenshots.push('orbit-rim-stretch.png');
+  await page.clock.runFor(270);
+  const held = await orbitState();
+  const lipAt = state => JSON.stringify(nearbyParticles(state, rimCursor, globeRadius * .16, globeRadius * .42));
+  check('the rim stays open and particles keep circulating under a still cursor',
+    held.particleEdge > 1.14 && lipAt(held) !== lipAt(extended));
   await page.mouse.move(6, 6);
-  await page.clock.runFor(640);
-  check('nearby connections fade when the pointer leaves', (await orbitState()).links === 0);
+  await page.clock.runFor(64);
+  check('connections persist briefly when the pointer leaves', (await orbitState()).anchors.length > 0);
+  await page.screenshot({path:out + '/orbit-pointer-release.png'});
+  report.screenshots.push('orbit-pointer-release.png');
+  await page.clock.runFor(610);
+  const settled = await orbitState();
+  check('nearby connections fade when the pointer leaves', settled.anchors.length === 0);
+  check('the stretched particles settle into the original silhouette', settled.particleEdge < 1.06);
   const about = await page.locator('#about').evaluate(element => element.getBoundingClientRect().top + scrollY);
   await page.evaluate(top => scrollTo({top, behavior:'instant'}), about);
   await page.clock.runFor(1000);
@@ -146,13 +184,51 @@ try {
     });
   });
   check('orbital paths reach all four areas of expertise', linksArrived.length === 4 && linksArrived.every(Boolean));
-  await page.clock.resume();
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await page.waitForFunction(() => document.querySelector('#orbit-still').width > 500);
-  check('reduced motion uses document-anchored artwork', await page.locator('#orbit-still').evaluate(canvas =>
+  const compactCenter = (await orbitState()).centers[0];
+  check('a single compact sphere is available in About', (await orbitState()).centers.length === 1);
+  if (compactCenter) {
+    const compactCursor = compactCenter.map(Math.round);
+    await page.mouse.move(...compactCursor);
+    await page.clock.runFor(320);
+    check('the compact sphere connects nearby particles to the pointer', tethersReach(await orbitState(), compactCursor, 3));
+    await page.screenshot({path:out + '/orbit-about-pointer.png'});
+    report.screenshots.push('orbit-about-pointer.png');
+  }
+  const suffixCycle = await page.locator('.brand-suffix em').evaluateAll(suffixes => {
+    const animations = suffixes.map(suffix => suffix.getAnimations().find(animation => animation.animationName === 'suffix-layer'));
+    if (animations.some(animation => !animation)) return [];
+    animations.forEach(animation => animation.pause());
+    return [700, 3000, 5300, 7600, 9900].map(time => {
+      animations.forEach(animation => { animation.currentTime = time; });
+      return suffixes.filter(suffix => parseFloat(getComputedStyle(suffix).opacity) > .9).map(suffix => suffix.textContent).join('');
+    });
+  });
+  check('brand cycles through all five suffixes', suffixCycle.join(' ') === '.dev .ai .geospatial .analytics .gis', suffixCycle.join(' '));
+  await page.locator('#approach').evaluate(section => section.scrollIntoView({behavior:'instant'}));
+  await page.clock.runFor(140);
+  const breathingText = await page.locator('.energy-text').evaluateAll(elements => elements.map(element => {
+    const animation = element.getAnimations().find(effect => effect.animationName === 'energy-text-sweep');
+    if (!animation) return false;
+    animation.pause();
+    animation.currentTime = 0;
+    const rest = getComputedStyle(element).backgroundPosition;
+    animation.currentTime = 3900;
+    return rest !== getComputedStyle(element).backgroundPosition;
+  }));
+  check('all four highlighted phrases animate their gradient', breathingText.length === 4 && breathingText.every(Boolean));
+  const reducedPage = await browser.newPage({viewport:{width:1159,height:883},reducedMotion:'reduce'});
+  await reducedPage.goto(base + '/dist/');
+  await reducedPage.waitForFunction(() => document.querySelector('#orbit-still').width > 500);
+  check('reduced motion uses document-anchored artwork', await reducedPage.locator('#orbit-still').evaluate(canvas =>
     getComputedStyle(canvas).position === 'absolute' && canvas.width > 500
     && getComputedStyle(document.querySelector('#orbit-canvas')).display === 'none'
   ));
+  check('reduced motion keeps the domain and text treatments static', await reducedPage.evaluate(() => {
+    const words = [...document.querySelectorAll('.brand-suffix em, .energy-text')];
+    return words.every(word => getComputedStyle(word).animationName === 'none') &&
+      [...document.querySelectorAll('.brand-suffix em')].filter(word => getComputedStyle(word).opacity === '1').map(word => word.textContent).join('') === '.dev';
+  }));
+  await reducedPage.close();
   check('Labs absent from Home',await page.locator('a[href="labs.html"],.lab-strip').count()===0);
   check('Labs not published',(await page.request.get(base + '/dist/labs.html')).status()===404);
   await ctx.close();
