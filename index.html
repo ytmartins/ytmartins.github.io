@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fafbf8">
-  <meta name="description" content="Yuri Martins — Geospatial Solutions Architect & AI-Native Builder. Spatial Thinking. Business Value. GeoAI Solutions. Enterprise GIS, utilities, GeoAI and AI-native engineering.">
+  <meta name="description" content="Yuri Martins — Geospatial Solutions Architect & AI-Native Builder. Spatial Thinking. Business Value. GeoAI Solutions. Enterprise GIS, location intelligence, spatial analytics and GeoAI.">
   <meta property="og:title" content="Yuri Martins — Spatial Intelligence & AI-Native Systems">
-  <meta property="og:description" content="Complex challenges. Spatial thinking. Business value. Enterprise GIS, utilities, GeoAI and AI-native engineering.">
+  <meta property="og:description" content="Location intelligence for better business decisions. See how I approach enterprise GIS, spatial analytics, and GeoAI.">
   <link rel="canonical" href="https://yurimartins.dev/">
   <meta property="og:url" content="https://yurimartins.dev/">
   <meta property="og:type" content="website">
@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="home.css">
   <link rel="preload" as="image" href="assets/territory-watercolor-v1.webp" fetchpriority="high">
-  <noscript><style>.hamburger,.timeline-actions,.stage-list,.toggle-list,.map-camera-controls,#askLocation,#askPotential,#validateExpansion{display:none!important}.top-links{display:flex;position:static;flex-wrap:wrap;width:100%;order:4}.header-inner{flex-wrap:wrap;padding-block:12px}.site-header{height:auto;min-height:82px}</style></noscript>
+  <noscript><style>.hamburger,.timeline-actions,.stage-list,.toggle-list,.map-camera-controls,#askLocation,#askPotential,#explorePotential,#validateExpansion{display:none!important}.top-links{display:flex;position:static;flex-wrap:wrap;width:100%;order:4}.header-inner{flex-wrap:wrap;padding-block:12px}.site-header{height:auto;min-height:82px}</style></noscript>
   <script src="app.js" defer></script>
 </head>
 <body class="page-home">
@@ -32,17 +32,37 @@
   <main id="main" tabindex="-1">
     <section class="hero" id="home" aria-labelledby="heroHeading"><div class="shell hero-grid">
       <div class="hero-copy">
-        <div class="eyebrow">Hi, I’m <span class="energy-text">Yuri Martins.</span></div>
         <h1 id="heroHeading">
           <span class="hero-headline-line">Spatial Thinking.</span>
           <span class="hero-headline-line energy-text">Business Value.</span>
           <span class="hero-headline-line hero-positioning">GeoAI Solutions.</span>
         </h1>
-        <p class="hero-lead">I design geospatial solutions for utilities and infrastructure, connecting business context, spatial thinking, and AI-native engineering. I bring clarity to help teams make better decisions.</p>
-        <div class="hero-actions"><a class="primary-btn" href="https://www.linkedin.com/in/ytmartins/" target="_blank" rel="noopener noreferrer">LinkedIn <span class="mini-arrow">↗</span></a><a class="ghost-btn" href="#about">About me <span class="mini-arrow">↓</span></a></div>
+        <p class="hero-role">Hi, I’m <strong class="energy-text">Yuri Martins.</strong></p>
+        <p class="hero-lead">I design geospatial solutions, connecting business context, spatial thinking, and AI-native engineering. I draw on the Science of Where to help teams make better decisions.</p>
+        <div class="hero-actions"><a class="primary-btn" id="caseStudyLink" href="#case-study">Explore the case study <span class="mini-arrow" aria-hidden="true">↓</span></a><a class="ghost-btn" href="#about">About me <span class="mini-arrow" aria-hidden="true">↓</span></a></div>
       </div>
-      <div class="story" id="spatialStory" role="group" data-stage="5" aria-label="Interactive six-stage illustration showing how synthetic geospatial context becomes decision-ready intelligence">
-        <div class="story-heading"><span>FROM COMPLEXITY TO CLARITY</span></div>
+      <div class="story-guide" id="case-walkthrough" tabindex="-1">
+        <ol class="story-chapters" aria-label="Case study walkthrough">
+          <li data-story-step="0"><strong>What makes a site worth connecting?</strong><p>A company wants to expand. It needs enough nearby demand and a practical way to connect new customers.</p></li>
+          <li data-story-step="2"><strong>The closest site needs a detour.</strong><p>The river puts the nearest-looking site on the wrong side of the network. Existing routes make other sites easier to serve.</p></li>
+          <li data-story-step="5"><strong>Choose where to start.</strong><p>The map compares potential customers and connection costs, then points to a first project the team can validate.</p></li>
+        </ol>
+      </div>
+      <div class="story" id="spatialStory" role="group" data-stage="5" aria-labelledby="storyTitle" aria-describedby="storySummary">
+        <div class="story-intro">
+          <div id="case-study" tabindex="-1"><h2 id="storyTitle">Where should we expand next?</h2></div>
+          <p id="storySummary">Case study with simulated data. Use the map to compare sites and choose where to start.</p>
+        </div>
+        <div class="story-timeline">
+          <div class="stage-list" role="group" aria-label="Choose a case study step">
+            <button type="button" class="stage-button" data-step="0" aria-label="Stage 1 Discover"><span class="stage-track"><span></span></span><span class="stage-no">01</span><span class="stage-name">Discover</span></button>
+            <button type="button" class="stage-button" data-step="1" aria-label="Stage 2 Connect"><span class="stage-track"><span></span></span><span class="stage-no">02</span><span class="stage-name">Connect</span></button>
+            <button type="button" class="stage-button" data-step="2" aria-label="Stage 3 Reveal"><span class="stage-track"><span></span></span><span class="stage-no">03</span><span class="stage-name">Reveal</span></button>
+            <button type="button" class="stage-button" data-step="3" aria-label="Stage 4 Focus"><span class="stage-track"><span></span></span><span class="stage-no">04</span><span class="stage-name">Focus</span></button>
+            <button type="button" class="stage-button" data-step="4" aria-label="Stage 5 Insight"><span class="stage-track"><span></span></span><span class="stage-no">05</span><span class="stage-name">Insight</span></button>
+            <button type="button" class="stage-button" data-step="5" aria-current="step" aria-label="Stage 6 Decision"><span class="stage-track"><span></span></span><span class="stage-no">06</span><span class="stage-name">Decision</span></button>
+          </div>
+        </div>
         <div class="story-visual watercolor-scene">
           <svg class="story-svg" viewBox="0 0 900 600" role="img" aria-labelledby="territoryTitle territoryDesc">
             <title id="territoryTitle">A question becomes a connected opportunity</title>
@@ -85,7 +105,7 @@
           <div class="agent-demo" data-best-h3="8aa8100c065ffff" aria-label="Illustrative agent conversation">
  <span class="agent-label">SPATIAL AGENT · DEMO</span>
  <button type="button" id="askLocation" aria-controls="agentAnswer">Why is this the best location? <span aria-hidden="true">↗</span></button>
- <span class="agent-thinking location-thinking" aria-hidden="true"><i></i><i></i><i></i></span><div id="agentAnswer"><strong>#1 · Priority growth area</strong><p>Demand within reach. Existing access. Lower connection cost.</p><div class="agent-metric"><!-- PROFIT -->US$ 2.7M / year<!-- END PROFIT --><span>area contribution · synthetic estimate</span></div><small>Next: Explore total growth potential.</small></div>
+ <span class="agent-thinking location-thinking" aria-hidden="true"><i></i><i></i><i></i></span><div id="agentAnswer"><strong>#1 · Priority growth area</strong><p>Demand within reach. Existing access. Lower connection cost.</p><div class="agent-metric"><!-- PROFIT -->US$ 2.7M / year<!-- END PROFIT --><span>area contribution · synthetic estimate</span></div><small><button type="button" class="citywide-link" id="explorePotential">Explore citywide potential</button></small></div>
  </div>
  <div class="approval-flight" aria-hidden="true"><svg viewBox="0 0 32 32"><defs><linearGradient id="rocketTrail"><stop stop-color="#c5f58a" stop-opacity="0"/><stop offset="1" stop-color="#dcffa9" stop-opacity=".85"/></linearGradient></defs><g class="rocket-trail"><path d="M-25 16Q-8 10 11 16Q-8 22-25 16Z" fill="url(#rocketTrail)"/><path d="M-17 16H10" stroke="#ecffc7" stroke-width="1.1" stroke-linecap="round"/></g><path d="M8 4Q6 3 7 6L11 14Q12 16 11 18L7 26Q6 29 9 27L28 18Q31 16 28 14Z" fill="currentColor"/></svg></div><div class="approval-result" hidden><span>HUMAN DECISION · AGENT-ASSISTED ACTION</span><strong>Project approved.</strong><p>Next: let’s talk about your business question.</p><a class="approval-contact" href="https://www.linkedin.com/in/ytmartins/" target="_blank" rel="noopener noreferrer" aria-label="Talk about your business with Yuri Martins on LinkedIn (opens in a new tab)">Talk about your business ↗</a><button type="button" id="repeatApproval">Explore the opportunity again ↗</button></div><div class="potential-chat" aria-label="Illustrative citywide agent conversation">
  <span class="agent-label">SPATIAL AGENT · DEMO</span>
@@ -98,24 +118,14 @@
  <div class="rank-key"><span></span> H3 · Profit potential <b>Low → High</b></div>
         </div>
         <div class="story-callout"><div class="callout-kicker" id="calloutKicker">06 · DECISION</div><strong id="calloutHeading">You decide the next move.</strong><p id="calloutText">Approve the recommended project. Turn spatial intelligence into action.</p></div>
-        <div class="story-timeline">
-          <div class="stage-list" role="group" aria-label="Select motion stage">
-            <button type="button" class="stage-button" data-step="0" aria-label="Stage 1 Discover"><span class="stage-track"><span></span></span><span class="stage-no">01</span><span class="stage-name">Discover</span></button>
-            <button type="button" class="stage-button" data-step="1" aria-label="Stage 2 Connect"><span class="stage-track"><span></span></span><span class="stage-no">02</span><span class="stage-name">Connect</span></button>
-            <button type="button" class="stage-button" data-step="2" aria-label="Stage 3 Reveal"><span class="stage-track"><span></span></span><span class="stage-no">03</span><span class="stage-name">Reveal</span></button>
-            <button type="button" class="stage-button" data-step="3" aria-label="Stage 4 Focus"><span class="stage-track"><span></span></span><span class="stage-no">04</span><span class="stage-name">Focus</span></button>
-            <button type="button" class="stage-button" data-step="4" aria-label="Stage 5 Insight"><span class="stage-track"><span></span></span><span class="stage-no">05</span><span class="stage-name">Insight</span></button>
-            <button type="button" class="stage-button" data-step="5" aria-current="step" aria-label="Stage 6 Decision"><span class="stage-track"><span></span></span><span class="stage-no">06</span><span class="stage-name">Decision</span></button>
-          </div>
-        </div>
         <p class="sr-only" id="storyAnnouncement" aria-live="polite" aria-atomic="true"></p>
       </div>
     </div></section>
     <section id="about" class="identity" aria-labelledby="aboutTitle"><div class="shell identity-inner">
-      <div class="person reveal"><span class="person-img"><img src="assets/portrait.webp" alt="Yuri Martins wearing glasses and a black shirt" width="3014" height="3492" loading="lazy"></span><div><div class="eyebrow"><span class="energy-text">Yuri Martins</span></div><h2 id="aboutTitle">Geospatial Solutions Architect</h2><p>Enterprise GIS and utility architecture, with extensive experience in geospatial data, analytics, and solution architecture with Esri ArcGIS. Exploring agentic AI development to build the future of GIS.</p><div class="socials"><a href="https://www.linkedin.com/in/ytmartins/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn @ytmartins">LinkedIn ↗</a><a href="https://github.com/ytmartins" target="_blank" rel="noopener noreferrer" aria-label="GitHub @ytmartins">GitHub ↗</a><a href="https://www.youtube.com/@ytmartins" target="_blank" rel="noopener noreferrer" aria-label="YouTube @ytmartins">YouTube ↗</a><a href="https://x.com/yurimartinsdev" target="_blank" rel="noopener noreferrer" aria-label="X @yurimartinsdev">X ↗</a></div></div></div>
-      <div class="expertise reveal" role="group" aria-label="Areas of expertise"><div class="expertise-item"><span class="expertise-number">01 / CORE</span><strong>Enterprise GIS</strong><p>Esri ArcGIS, architectures and systems integration.</p></div><div class="expertise-item"><span class="expertise-number">02 / DOMAIN</span><strong>Utilities & Infrastructure</strong><p>Network, assets and operations.</p></div><div class="expertise-item"><span class="expertise-number">03 / VALUE</span><strong>Spatial Intelligence</strong><p>Context, patterns and decisions.</p></div><div class="expertise-item"><span class="expertise-number">04 / EXPLORING</span><strong>AI-Native Engineering</strong><p>Agents, workflows and applied GeospatialAI.</p></div></div>
+      <div class="person reveal"><span class="person-img"><img src="assets/portrait.webp" alt="Yuri Martins wearing glasses and a black shirt" width="3014" height="3492" loading="lazy"></span><div><div class="eyebrow"><span class="energy-text">Yuri Martins</span></div><h2 id="aboutTitle">Geospatial Solutions Architect</h2><p>As a business architect, I help more than 22 companies build and scale enterprise GIS. Through presales and advisory work, I shape solution visions and guide geospatial strategy so clients can build capabilities, measure business impact, and identify new sales opportunities.</p><p>I help clients modernize their GIS and prepare for AI adoption, including MCP for ArcGIS Enterprise, with data governance, quality, and security built into the roadmap.</p><div class="socials"><a href="https://www.linkedin.com/in/ytmartins/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn @ytmartins">LinkedIn ↗</a><a href="https://github.com/ytmartins" target="_blank" rel="noopener noreferrer" aria-label="GitHub @ytmartins">GitHub ↗</a><a href="https://www.youtube.com/@ytmartins" target="_blank" rel="noopener noreferrer" aria-label="YouTube @ytmartins">YouTube ↗</a><a href="https://x.com/yurimartinsdev" target="_blank" rel="noopener noreferrer" aria-label="X @yurimartinsdev">X ↗</a></div></div></div>
+      <div class="expertise reveal" role="group" aria-label="Areas of expertise"><div class="expertise-item"><span class="expertise-number">01 / CORE</span><strong>Enterprise GIS</strong><p>I combine Esri ArcGIS architecture and geospatial data science to turn business needs into spatial solutions.</p></div><div class="expertise-item"><span class="expertise-number">02 / DOMAIN</span><strong>Spatial Data &amp; Analytics</strong><p>Connect datasets and analyze spatial patterns to inform decisions.</p></div><div class="expertise-item"><span class="expertise-number">03 / STRATEGY</span><strong>Business Architecture</strong><p>Presales, product design, and innovation.</p></div><div class="expertise-item"><span class="expertise-number">04 / APPLIED</span><strong>GeoAI &amp; Agents</strong><p>Agentic workflows and applied geospatial AI.</p></div></div>
     </div></section>
-    <section id="approach" class="approach" aria-labelledby="approachTitle"><div class="shell"><div class="section-heading">MY APPROACH</div><div class="approach-row"><h2 id="approachTitle" class="reveal"><span class="energy-text">Clarity</span> <span class="approach-soft">before complexity.</span></h2><div class="principles"><article class="principle reveal"><div class="principle-title"><span class="principle-num">01</span><h3>Solve real problems</h3></div><p>Understand business challenges before defining technology.</p></article><article class="principle reveal"><div class="principle-title"><span class="principle-num">02</span><h3>Bridge technology and people</h3></div><p>Connect business goals, data, teams and systems.</p></article><article class="principle reveal"><div class="principle-title"><span class="principle-num">03</span><h3>Build for what's next</h3></div><p>Combine mature spatial engineering with emerging AI-native approaches.</p></article></div></div></div></section>
+    <section id="approach" class="approach" aria-labelledby="approachTitle"><div class="shell"><div class="section-heading">MY APPROACH</div><div class="approach-row"><h2 id="approachTitle" class="reveal"><span class="energy-text">Get clear.</span> <span class="approach-soft">Build to scale.</span></h2><div class="principles"><article class="principle reveal"><div class="principle-title"><span class="principle-num">01</span><h3>Solve real problems</h3></div><p>Understand business challenges before defining technology.</p></article><article class="principle reveal"><div class="principle-title"><span class="principle-num">02</span><h3>Set a geospatial strategy</h3></div><p>Connect discovery, strategic pillars, and roadmaps so leaders can tie each initiative to a measurable outcome.</p></article><article class="principle reveal"><div class="principle-title"><span class="principle-num">03</span><h3>Build for what's next</h3></div><p>Combine mature spatial engineering with emerging AI-native approaches.</p></article></div></div></div></section>
   </main>
   <footer id="contact" class="contact-footer"><div class="shell footer-inner"><strong>Based in Brazil · Globally connected</strong><div class="learning-credential"><strong>Enterprise Design Thinking - Team Essentials for AI</strong><span>IBM · Foundational Learning Badge · 2021</span><a href="https://www.credly.com/badges/ad4a8e35-108f-4e65-85aa-a2b212ea1b9d/public_url" target="_blank" rel="noopener noreferrer" aria-label="Verify IBM Enterprise Design Thinking learning badge on Credly">Verify credential ↗</a></div></div></footer>
 </body>
