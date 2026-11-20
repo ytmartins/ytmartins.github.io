@@ -11,9 +11,9 @@ const out='docs/qa/generated';await mkdir(out,{recursive:true});
 const {chromium,firefox,webkit}=await import('playwright');
 const report={checks:[],screenshots:[],axe:[],runtime:[],metrics:[],browserMatrix:[]};
 const check=(name,pass,detail='')=>{report.checks.push({name,pass,detail});if(!pass)console.error('FAIL',name,detail);};
-const server=spawn(process.execPath,['scripts/serve.mjs','.'],{stdio:['ignore','pipe','pipe']});
-await new Promise((ok,fail)=>{server.stdout.once('data',ok);server.once('error',fail);server.once('exit',code=>{if(code)fail(Error(`Server exit ${code}`));});});
-const base='http://127.0.0.1:4173';
+const server=spawn(process.execPath,['scripts/serve.mjs','.','0'],{stdio:['ignore','pipe','pipe']});
+const readiness=await new Promise((ok,fail)=>{server.stdout.once('data',ok);server.once('error',fail);server.once('exit',code=>{if(code)fail(Error(`Server exit ${code}`));});});
+const base=readiness.toString().trim().replace('Local: ','');
 let browser;
 const settle=async page=>{
   await page.evaluate(async()=>{for(let y=0;y<document.body.scrollHeight;y+=500){scrollTo(0,y);await new Promise(r=>setTimeout(r,35));}scrollTo(0,0);});
@@ -36,16 +36,16 @@ try {
         const filename=`${route==='index.html'?'home':'labs'}-${width}.png`;
         await page.screenshot({path:`${out}/${filename}`,fullPage:true});report.screenshots.push(filename);
         check(`${route} hero positioning ${width}`,(await page.locator('h1').innerText()).replace(/\s+/g,' ').trim()==='Spatial Thinking. Business Value. GeoAI Solutions.');
-        check(`${route} hero CTAs preserved ${width}`,await page.locator('.hero-actions a').count()===2);
+        check(`${route} single hero CTA ${width}`,await page.locator('.hero-actions a').count()===1);
 
       }
       if([390,1440].includes(width)) {
+        check(`${route} is indexable ${width}`,await page.locator('meta[name="robots"][content*="noindex"]').count()===0);
         await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
         const result=await page.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return {violations:r.violations,incomplete:r.incomplete};});
         report.axe.push({route,width,...result});check(`${route} axe ${width}`,result.violations.length===0,result.violations.map(x=>x.id).join(','));
       }
       if(width===390) {
-        check('reduced motion case study link targets the map',await page.getByRole('link',{name:'Explore the case study'}).getAttribute('href')==='#case-study');
         await page.locator('#menuButton').click();check(`${route} menu open`,await page.locator('#menuButton').getAttribute('aria-expanded')==='true');
         await page.keyboard.press('Escape');check(`${route} menu Escape`,await page.locator('#menuButton').getAttribute('aria-expanded')==='false'&&await page.locator('#menuButton').evaluate(e=>e===document.activeElement));
         await page.keyboard.press('Control+Home');await page.keyboard.press('Tab');
@@ -65,19 +65,96 @@ try {
       await context.close();
     }
   }
-  const ctx=await browser.newContext({viewport:{width:1440,height:900}});const page=await ctx.newPage();
-  await page.clock.install();await page.goto(`${base}/dist/`);
-  await page.locator('[data-step="0"]').click();
-  check('case study link targets the walkthrough',await page.getByRole('link',{name:'Explore the case study'}).getAttribute('href')==='#case-walkthrough');
-  for(let stage=0;stage<6;stage++) {
-    await page.locator(`[data-step="${stage}"]`).click();
-    check(`manual stage ${stage}`,await page.locator(`[data-step="${stage}"]`).getAttribute('aria-current')==='step');
-    await page.clock.runFor(8000);check(`stage ${stage} holds`,await page.locator('#spatialStory').getAttribute('data-stage')===String(stage));
-  }
+  const ctx = await browser.newContext({viewport:{width:1159,height:883}});
+  const page = await ctx.newPage();
+  page.on('pageerror', error => report.runtime.push(error.message));
+  page.on('response', response => { if (response.status() >= 400) report.runtime.push(response.url()); });
+
+  // Observe the painted geometry without adding test-only state to the homepage.
+  await page.addInitScript(() => {
+    window.orbitPaint = {centers:new Set(), links:0};
+    const clear = CanvasRenderingContext2D.prototype.clearRect;
+    CanvasRenderingContext2D.prototype.clearRect = function (...args) {
+      if (this.canvas.id === 'orbit-canvas') {
+        window.orbitPaint.centers.clear();
+        window.orbitPaint.links = 0;
+      }
+      return clear.apply(this, args);
+    };
+    const arc = CanvasRenderingContext2D.prototype.arc;
+    CanvasRenderingContext2D.prototype.arc = function (...args) {
+      if (this.canvas.id === 'orbit-canvas' && args[2] < .07) {
+        const {e, f} = this.getTransform();
+        window.orbitPaint.centers.add(e + ',' + f);
+      }
+      return arc.apply(this, args);
+    };
+    const stroke = CanvasRenderingContext2D.prototype.stroke;
+    CanvasRenderingContext2D.prototype.stroke = function (...args) {
+      if (this.canvas.id === 'orbit-canvas' && this.lineWidth < .024 &&
+          typeof this.strokeStyle === 'string' && this.strokeStyle.startsWith('rgba')) {
+        window.orbitPaint.links++;
+      }
+      return stroke.apply(this, args);
+    };
+  });
+  const start = new Date();
+  await page.clock.install({time:start});
+  await page.clock.pauseAt(new Date(+start + 1000));
+  await page.goto(base + '/dist/');
+  const orbitState = () => page.evaluate(() => {
+    const {centers, links} = window.orbitPaint;
+    return {
+      centers: [...centers].map(center => center.split(',').map(Number)),
+      links,
+      opening: document.documentElement.classList.contains('orbit-opening')
+    };
+  });
+  await page.clock.runFor(64);
+  const first = await orbitState();
+  check('opening begins with one centered sphere', first.opening && first.centers.length === 1 &&
+    Math.abs(first.centers[0][0] - 1159 / 2) < 18);
+  await page.clock.runFor(800);
+  check('copy waits for orbital handoff', (await orbitState()).opening);
+  await page.clock.runFor(300);
+  const ready = await orbitState();
+  check('one sphere settles to the right and reveals copy', !ready.opening && ready.centers.length === 1 &&
+    ready.centers[0][0] > 795);
+  const art = await page.locator('.spatial-orbit').boundingBox();
+  await page.mouse.move(art.x + art.width / 2 - 31, art.y + art.height / 2 - 32);
+  await page.clock.runFor(540);
+  const active = await orbitState();
+  check('pointer connects nearby particles within one sphere', active.centers.length === 1 &&
+    active.links > 0 && active.links <= 6);
+  await page.screenshot({path:out + '/orbit-pointer.png'});
+  report.screenshots.push('orbit-pointer.png');
+  await page.mouse.move(6, 6);
+  await page.clock.runFor(640);
+  check('nearby connections fade when the pointer leaves', (await orbitState()).links === 0);
+  const about = await page.locator('#about').evaluate(element => element.getBoundingClientRect().top + scrollY);
+  await page.evaluate(top => scrollTo({top, behavior:'instant'}), about);
+  await page.clock.runFor(1000);
+  const linksArrived = await page.evaluate(() => {
+    const canvas = document.querySelector('#orbit-canvas');
+    const canvasContext = canvas.getContext('2d');
+    const ratio = canvas.width / document.documentElement.clientWidth;
+    return [...document.querySelectorAll('.orbit-hub .expertise-item')].map(card => {
+      const rect = card.getBoundingClientRect();
+      const x = Math.round((rect.left + parseFloat(getComputedStyle(card).paddingLeft) + 15) * ratio);
+      const y = Math.round((rect.top + 3) * ratio);
+      return canvasContext.getImageData(x - 2, y - 2, 4, 4).data.some((value, index) => index % 4 === 3 && value > 110);
+    });
+  });
+  check('orbital paths reach all four areas of expertise', linksArrived.length === 4 && linksArrived.every(Boolean));
+  await page.clock.resume();
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.locator('[data-step="0"]').click();await page.clock.runFor(8000);check('reduced motion manual selection holds',await page.locator('#spatialStory').getAttribute('data-stage')==='0');
+  await page.waitForFunction(() => document.querySelector('#orbit-still').width > 500);
+  check('reduced motion uses document-anchored artwork', await page.locator('#orbit-still').evaluate(canvas =>
+    getComputedStyle(canvas).position === 'absolute' && canvas.width > 500
+    && getComputedStyle(document.querySelector('#orbit-canvas')).display === 'none'
+  ));
   check('Labs absent from Home',await page.locator('a[href="labs.html"],.lab-strip').count()===0);
-  check('Labs not published',(await page.request.get(`${base}/dist/labs.html`)).status()===404);
+  check('Labs not published',(await page.request.get(base + '/dist/labs.html')).status()===404);
   await ctx.close();
   for(const route of ['index.html']) {
     const keyboard=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});const p=await keyboard.newPage();await p.goto(`${base}/dist/${route}`);
