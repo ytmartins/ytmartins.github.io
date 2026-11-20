@@ -98,13 +98,15 @@
         if (item.getBoundingClientRect().top > readingLine) break;
         chapter = item;
       }
-      if (chapter === activeChapter) return;
+      // A manual selection can change the stage without changing the active chapter.
+      // Reconcile both values when scrolling returns to the same chapter.
+      const next = Number(chapter.dataset.storyStep);
+      if (chapter === activeChapter && next === stage) return;
       // Let a keyboard-focused control or an approved project stay in place.
       const focused = document.activeElement;
       if (story.dataset.approval || (story.contains(focused) && focused.matches(':focus-visible'))) return;
       activeChapter = chapter;
       chapters.forEach(item => item.classList.toggle('is-active', item === chapter));
-      const next = Number(chapter.dataset.storyStep);
       if (next === stage) return;
       delete story.dataset.manual;
       setStage(next);
