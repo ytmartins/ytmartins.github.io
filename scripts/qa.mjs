@@ -45,6 +45,7 @@ try {
         report.axe.push({route,width,...result});check(`${route} axe ${width}`,result.violations.length===0,result.violations.map(x=>x.id).join(','));
       }
       if(width===390) {
+        check('reduced motion case study link targets the map',await page.getByRole('link',{name:'Explore the case study'}).getAttribute('href')==='#case-study');
         await page.locator('#menuButton').click();check(`${route} menu open`,await page.locator('#menuButton').getAttribute('aria-expanded')==='true');
         await page.keyboard.press('Escape');check(`${route} menu Escape`,await page.locator('#menuButton').getAttribute('aria-expanded')==='false'&&await page.locator('#menuButton').evaluate(e=>e===document.activeElement));
         await page.keyboard.press('Control+Home');await page.keyboard.press('Tab');
@@ -67,7 +68,7 @@ try {
   const ctx=await browser.newContext({viewport:{width:1440,height:900}});const page=await ctx.newPage();
   await page.clock.install();await page.goto(`${base}/dist/`);
   await page.locator('[data-step="0"]').click();
-  check('story can pause',await page.locator('#spatialStory').evaluate(e=>e.classList.contains('motion-paused')));
+  check('case study link targets the walkthrough',await page.getByRole('link',{name:'Explore the case study'}).getAttribute('href')==='#case-walkthrough');
   for(let stage=0;stage<6;stage++) {
     await page.locator(`[data-step="${stage}"]`).click();
     check(`manual stage ${stage}`,await page.locator(`[data-step="${stage}"]`).getAttribute('aria-current')==='step');

@@ -41,28 +41,20 @@
   const story = $('#spatialStory');
   if (story) {
     const descriptions = [
-      ['DISCOVER','Start with the business question.','A living territory. Many signals. One intent.','Complex challenges start with people and context.'],
-      ['CONNECT','Give the question a shared context.','Bring business intent, spatial evidence and systems together.','Connect what the organization already knows.'],
-      ['REVEAL','Close does not always mean connected.','Access and infrastructure change the meaning of proximity.','Compare relationships, not just locations.'],
-      ['FOCUS','Turn context into a working hypothesis.','The connected cluster deserves a closer investigation.','Explore growth using existing connections.'],
-      ['INSIGHT','A stronger place to grow.','Compare estimated contribution. Validate the winning hypothesis.','Rank opportunities. Understand the trade-offs.'],
-      ['DECISION','You decide the next move.','Approve the recommended project. Turn spatial intelligence into action.','Your decision activates the opportunity.']
+      ['DISCOVER','Start with a location decision.','Which sites offer enough demand and a practical way to connect?'],
+      ['CONNECT','Map what the team already knows.','See potential customers alongside existing routes.'],
+      ['REVEAL','The network changes the answer.','The dashed route shows the bridge detour to the closest-looking site.'],
+      ['FOCUS','Narrow the search.','Look more closely at the sites near an existing route.'],
+      ['INSIGHT','Compare the strongest candidates.','Use demand and connection cost to rank the options.'],
+      ['DECISION','Choose a first project to validate.','Review the recommendation and approve it in this simulated case.']
     ];
-    const durations = [3000,3500,4000,3500,10500,24000];
     const stageButtons = $$('.stage-button',story);
-    const play = $('#storyPlay');
     let stage = reducedMotion.matches ? 5 : 0;
-    let playing = !reducedMotion.matches;
     let onScreen = false;
-    let timer = null;
-    let remaining = durations[stage];
-    let started = 0;
     let approvalRun=0;
     let cinematic=[];
-    const decisionHolds=new Set();
     const setStage = (s, announce = false) => {
       stage = s;
-      decisionHolds.clear();
       delete story.dataset.zoom;
       delete story.dataset.insight;
       if(s!==5) delete story.dataset.invitation;
@@ -83,66 +75,91 @@
         else btn.removeAttribute('aria-current');
         btn.classList.toggle('completed',i<stage);
       });
-      if(announce) $('#storyAnnouncement').textContent=descriptions[stage].slice(0,3).join('. ');
+      if(announce) $('#storyAnnouncement').textContent=descriptions[stage].join(' ');
     };
     const sync = () => {
-      if(timer !== null) {
-        clearTimeout(timer); timer = null;
-        remaining = Math.max(0,remaining-(performance.now()-started));
-      }
       cinematic.forEach(a=>{if(a.playState==='finished'||a.playState==='idle')return;if(onScreen&&!document.hidden)a.play();else a.pause();});
-      const running = playing && !(stage===5&&decisionHolds.size) && onScreen && !document.hidden && !reducedMotion.matches;
-      story.classList.toggle('motion-paused',!running);
-      story.classList.toggle('effects-paused',!onScreen||document.hidden||reducedMotion.matches);
-      if(play) play.textContent = playing ? 'Pause' : 'Play';
-      play?.setAttribute('aria-label',playing ? 'Pause spatial story' : 'Play spatial story');
-      if(play) play.disabled = reducedMotion.matches;
-      if(running) {
-        started = performance.now();
-        timer = setTimeout(()=>{
-          timer = null;
-          if(stage===4 && !story.dataset.insight){
-            story.dataset.insight="city";
-            $("#calloutHeading").textContent="See the bigger opportunity.";
-            $("#calloutText").textContent="One recommended project. A wider citywide growth potential.";
-            remaining=5500; sync(); return;
-          }
-          setStage((stage+1)%descriptions.length);
-          remaining = durations[stage];
-          sync();
-        },stage===4 && !story.dataset.insight ? Math.max(0,remaining-5500) : remaining);
-      }
+      const paused = !onScreen || document.hidden || reducedMotion.matches;
+      story.classList.toggle('motion-paused', paused);
+      story.classList.toggle('effects-paused', paused);
     };
+
+    const guide = matchMedia('(min-width: 1000px) and (min-height: 740px) and (prefers-reduced-motion: no-preference)');
+    const chapters = $$('.story-chapters li');
+    const caseStudyLink = $('#caseStudyLink');
+    let activeChapter = null;
+    let scrollFrame = 0;
+    const scrollStory = () => {
+      scrollFrame = 0;
+      if (!guide.matches || !chapters.length) return;
+      const readingLine = innerHeight * .52;
+      let chapter = chapters[0];
+      for (const item of chapters) {
+        if (item.getBoundingClientRect().top > readingLine) break;
+        chapter = item;
+      }
+      if (chapter === activeChapter) return;
+      // Let a keyboard-focused control or an approved project stay in place.
+      const focused = document.activeElement;
+      if (story.dataset.approval || (story.contains(focused) && focused.matches(':focus-visible'))) return;
+      activeChapter = chapter;
+      chapters.forEach(item => item.classList.toggle('is-active', item === chapter));
+      const next = Number(chapter.dataset.storyStep);
+      if (next === stage) return;
+      delete story.dataset.manual;
+      setStage(next);
+    };
+    const queueScrollStory = () => {
+      if (guide.matches && !scrollFrame) scrollFrame = requestAnimationFrame(scrollStory);
+    };
+    const syncGuide = () => {
+      const guided = guide.matches && chapters.length > 0;
+      story.closest('.hero-grid').classList.toggle('is-guided', guided);
+      story.toggleAttribute('data-guided', guided);
+      caseStudyLink.setAttribute('href', guided ? '#case-walkthrough' : '#case-study');
+      activeChapter = null;
+      queueScrollStory();
+    };
+    addEventListener('scroll', queueScrollStory, {passive:true});
+    addEventListener('resize', queueScrollStory);
+    guide.addEventListener('change', syncGuide);
+    story.addEventListener('focusout', event => {
+      if (!story.contains(event.relatedTarget)) queueScrollStory();
+    });
+
     stageButtons.forEach(btn=>btn.addEventListener('click',()=>{
-      playing = false; sync(); story.dataset.manual = 'true'; setStage(Number(btn.dataset.step),true); remaining = durations[stage];
+      story.dataset.manual = 'true';
+      setStage(Number(btn.dataset.step),true);
     }));
     $('#askLocation').addEventListener('click',()=>{
-      playing=false; sync(); story.dataset.manual='true'; setStage(4,true);
+      story.dataset.manual='true'; setStage(4,true);
       story.dataset.explained='true'; story.dataset.zoom='in';
       $('#storyAnnouncement').textContent='Highest estimated contribution: demand within reach, existing access and lower connection cost. Synthetic scenario. Validate capacity, demand and constraints.';
     });
-    $('#askPotential').addEventListener('click',()=>{
+    const showCityPotential = () => {
       const camera=$('.territory-camera',story),prior=getComputedStyle(camera).transform;
-      playing=false;sync();story.dataset.manual='true';
-      if(stage!==5){
-        setStage(4,true);story.dataset.insight='city';
-        if(!reducedMotion.matches){
-          cinematic.push(camera.animate([{transform:prior},{transform:'scale(.96)'}],{duration:1800,easing:'cubic-bezier(.2,.65,.2,1)',fill:'both'}));sync();
-        }
+      story.dataset.manual='true';
+      setStage(4);story.dataset.insight='city';
+      $('#calloutHeading').textContent='See the citywide opportunity.';
+      $('#calloutText').textContent='Compare the first project with the other potential connections on the map.';
+      if(!reducedMotion.matches){
+        cinematic.push(camera.animate([{transform:prior},{transform:'scale(.96)'}],{duration:720,easing:'cubic-bezier(.2,.65,.2,1)',fill:'both'}));
+        sync();
       }
+      $('#askPotential').focus({preventScroll:true});
+      $('#storyAnnouncement').textContent='Citywide potential. ' + $('.potential-value').textContent + '. ' + $('.potential-count').textContent + '.';
+    };
+    $('#explorePotential').addEventListener('click',showCityPotential);
+    $('#askPotential').addEventListener('click',()=>{
+      if(stage!==5 && !story.dataset.insight) {showCityPotential(); return;}
       $('#storyAnnouncement').textContent=$('#potentialAnswer').textContent;
     });
-    const decision=$('.decision-card',story);
-    decision.addEventListener('pointerenter',()=>{decisionHolds.add('pointer');sync();});
-    decision.addEventListener('pointerleave',()=>{decisionHolds.delete('pointer');sync();});
-    decision.addEventListener('focusin',()=>{decisionHolds.add('focus');sync();});
-    decision.addEventListener('focusout',e=>{if(!decision.contains(e.relatedTarget)){decisionHolds.delete('focus');sync();}});
     $('#validateExpansion').addEventListener('click',async()=>{
       const visual=$('.story-visual',story), button=$('#validateExpansion');
       const origin=$('.launch-arrow',button).getBoundingClientRect();
       const height=visual.getBoundingClientRect().height;
       const priorCamera=getComputedStyle($('.territory-camera',story)).transform;
-      playing=false;sync();story.dataset.manual='true';setStage(5);
+      story.dataset.manual='true';setStage(5);
       const run=approvalRun;
       story.dataset.approval='flying';
       visual.style.minHeight=height+'px';
@@ -204,26 +221,15 @@
       }catch(error){if(error.name!=='AbortError')throw error;}
     });
     $('#repeatApproval').addEventListener('click',()=>{
-      playing=false;sync();story.dataset.manual='true';setStage(5,true);
+      story.dataset.manual='true';setStage(5,true);
       $('#validateExpansion').focus({preventScroll:true});
     });
-    play?.addEventListener('click',()=>{playing = !playing; if(playing) delete story.dataset.manual; sync();});
-    $('#storyReplay')?.addEventListener('click',()=>{
-      playing = false; sync();
-      delete story.dataset.manual;
-      setStage(reducedMotion.matches ? 5 : 0,true);
-      story.querySelectorAll('.paint-dab').forEach(el=>el.getAnimations?.().forEach(animation=>{animation.currentTime=0;}));
-      remaining = durations[stage]; playing = !reducedMotion.matches; sync();
-    });
     document.addEventListener('visibilitychange',sync);
-    reducedMotion.addEventListener('change',()=>{
-      if(reducedMotion.matches) {playing = false; sync(); setStage(5); remaining = durations[5];}
-      sync();
-    });
+    reducedMotion.addEventListener('change',sync);
     if('IntersectionObserver' in window) {
       new IntersectionObserver(entries=>{onScreen=entries[0].isIntersecting;sync();},{threshold:.15}).observe(story);
     } else {onScreen = true;}
-    setStage(stage); sync();
+    setStage(stage); sync(); syncGuide();
     requestAnimationFrame(()=>requestAnimationFrame(()=>story.classList.add('story-ready')));
   }
 
