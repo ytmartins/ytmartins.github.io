@@ -194,6 +194,28 @@ try {
     await page.screenshot({path:out + '/orbit-about-pointer.png'});
     report.screenshots.push('orbit-about-pointer.png');
   }
+  const suffixCycle = await page.locator('.brand-suffix em').evaluateAll(suffixes => {
+    const animations = suffixes.map(suffix => suffix.getAnimations().find(animation => animation.animationName === 'suffix-layer'));
+    if (animations.some(animation => !animation)) return [];
+    animations.forEach(animation => animation.pause());
+    return [700, 3000, 5300, 7600, 9900].map(time => {
+      animations.forEach(animation => { animation.currentTime = time; });
+      return suffixes.filter(suffix => parseFloat(getComputedStyle(suffix).opacity) > .9).map(suffix => suffix.textContent).join('');
+    });
+  });
+  check('brand cycles through all five suffixes', suffixCycle.join(' ') === '.dev .ai .geospatial .analytics .gis', suffixCycle.join(' '));
+  await page.locator('#approach').evaluate(section => section.scrollIntoView({behavior:'instant'}));
+  await page.clock.runFor(140);
+  const breathingText = await page.locator('.energy-text').evaluateAll(elements => elements.map(element => {
+    const animation = element.getAnimations().find(effect => effect.animationName === 'energy-text-sweep');
+    if (!animation) return false;
+    animation.pause();
+    animation.currentTime = 0;
+    const rest = getComputedStyle(element).backgroundPosition;
+    animation.currentTime = 3900;
+    return rest !== getComputedStyle(element).backgroundPosition;
+  }));
+  check('all four highlighted phrases animate their gradient', breathingText.length === 4 && breathingText.every(Boolean));
   const reducedPage = await browser.newPage({viewport:{width:1159,height:883},reducedMotion:'reduce'});
   await reducedPage.goto(base + '/dist/');
   await reducedPage.waitForFunction(() => document.querySelector('#orbit-still').width > 500);
@@ -201,6 +223,11 @@ try {
     getComputedStyle(canvas).position === 'absolute' && canvas.width > 500
     && getComputedStyle(document.querySelector('#orbit-canvas')).display === 'none'
   ));
+  check('reduced motion keeps the domain and text treatments static', await reducedPage.evaluate(() => {
+    const words = [...document.querySelectorAll('.brand-suffix em, .energy-text')];
+    return words.every(word => getComputedStyle(word).animationName === 'none') &&
+      [...document.querySelectorAll('.brand-suffix em')].filter(word => getComputedStyle(word).opacity === '1').map(word => word.textContent).join('') === '.dev';
+  }));
   await reducedPage.close();
   check('Labs absent from Home',await page.locator('a[href="labs.html"],.lab-strip').count()===0);
   check('Labs not published',(await page.request.get(base + '/dist/labs.html')).status()===404);

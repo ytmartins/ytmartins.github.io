@@ -40,7 +40,6 @@
   .page-spatial-orbit .expertise-item:first-of-type { border-top: 0; }
 }
 
-.page-spatial-orbit :is(.brand-suffix em, .energy-text),
 .page-spatial-orbit .header-cta .status-dot::after { animation: none; }
 .page-spatial-orbit.motion-ready .reveal { opacity: 1; transform: none; animation: none; transition: none; }
 .page-spatial-orbit .person-img { width: clamp(114px, 11vw, 140px); height: auto; aspect-ratio: 7 / 8; }
