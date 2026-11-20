@@ -4,7 +4,7 @@ const output = resolve('dist');
 await mkdir(resolve(output,'assets'),{recursive:true});
 // Labs source stays in the repository until real content is ready.
 await rm(resolve(output,'labs.html'),{force:true});
-const pages = ['index.html','styles.css','home.css','app.js'];
+const pages = ['index.html','styles.css','home.css','orbit.css','app.js','orbit.js','orbit-background.js'];
 const assets = ['favicon.png','navigator-code-original.webp','portrait.webp','terrain.webp','infrastructure.webp','network.webp','map-ambient.webp','territory-watercolor-v1.webp'];
 // Reject stale/unexpected output rather than accidentally publishing it.
 for (const entry of await readdir(output)) {
