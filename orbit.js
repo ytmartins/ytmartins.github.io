@@ -57,7 +57,6 @@ import { createLiquidBackground } from './orbit-background.js';
   const drag = [27, 112, 246];
   const wave = { x: .72, y: .54, strength: 0 };
   const heroField = pointerField();
-  const landingField = pointerField();
   let layout;
   let ratio = 1;
   let frame = 0;
@@ -130,27 +129,18 @@ import { createLiquidBackground } from './orbit-background.js';
   function positions() {
     const { hero, landing, height } = layout;
     const top = scrollY;
-    const start = Math.min(64, hero.y * .13);
-    const end = Math.max(start + 150, landing.y - height * .33);
+    const mobile = stacked.matches;
+    const start = mobile ? Math.max(0, hero.y - height * .70) : Math.min(64, hero.y * .13);
+    const end = Math.max(start + 150, landing.y - height * (mobile ? .52 : .33));
     const progress = smooth((top - start) / (end - start));
-    if (stacked.matches) {
-      const fade = smooth((hero.y + hero.r * 1.45 - top) / (hero.r * 2.3));
-      const arrival = smooth((height - landing.y + top) / (height * .24));
-      return {
-        hero: { ...hero, y: hero.y - top, opacity: fade },
-        landing: { ...landing, y: landing.y - top, opacity: arrival },
-        link: arrival,
-        turn: .81 * arrival,
-      };
-    }
     return {
       hero: {
-        x: mix(hero.x, landing.x, progress) - Math.min(52, layout.width * .045) * Math.sin(progress * Math.PI),
+        x: mix(hero.x, landing.x, progress) - (mobile ? 0 : Math.min(52, layout.width * .045)) * Math.sin(progress * Math.PI),
         y: mix(hero.y, landing.y, progress) - top,
         r: mix(hero.r, landing.r, progress),
         opacity: 1,
       },
-      link: smooth((progress - .57) / .43),
+      link: smooth((progress - (mobile ? .78 : .57)) / (mobile ? .22 : .43)),
       turn: .81 * progress,
     };
   }
@@ -506,17 +496,18 @@ import { createLiquidBackground } from './orbit-background.js';
     const left = verticalRail.matches;
     const rail = anchors[0].x - 13;
     const railTop = anchors[0].y - 29;
+    const branchOffset = 9;
     const origin = { x: pose.x, y: pose.y + pose.r * .86 };
     const trunk = left ? curve(origin.x, origin.y, { x: origin.x, y: railTop - 11 }, { x: rail, y: railTop - 22 }, { x: rail, y: railTop }) : [];
     if (left) {
       stroke(trunk, colors[0], 1.1, .55 * amount);
-      stroke([{ x: rail, y: railTop }, { x: rail, y: anchors.at(-1).y }], colors[0], 1.1, .39 * amount);
+      stroke([{ x: rail, y: railTop }, { x: rail, y: anchors.at(-1).y - branchOffset }], colors[0], 1.1, .39 * amount);
     }
     anchors.forEach((target, index) => {
       const progress = left ? amount : smooth((amount - index * .095) / .68);
       if (progress <= .001) return;
       const x = left ? rail : origin.x + (index - 1.5) * pose.r * .33;
-      const y = left ? target.y - 9 : Math.min(origin.y, target.y - 8);
+      const y = left ? target.y - branchOffset : Math.min(origin.y, target.y - 8);
       const middle = mix(y, target.y, .56);
       const path = curve(x, y, { x, y: middle }, { x: target.x, y: middle }, target, progress);
       const color = colors[index];
@@ -546,7 +537,6 @@ import { createLiquidBackground } from './orbit-background.js';
     ctx.setTransform(density, 0, 0, density, 0, 0);
     energy = 0;
     positionPointer(heroField, null, 1000);
-    positionPointer(landingField, null, 1000);
     const hero = { ...layout.hero, y: layout.hero.y - top, opacity: 1 };
     const landing = { ...layout.landing, y: layout.landing.y - top, opacity: 1 };
     paintBackground(ctx, { ...layout.panel, y: layout.panel.y - top }, 0, { x: .67, y: .48 }, 0);
@@ -570,26 +560,22 @@ import { createLiquidBackground } from './orbit-background.js';
   function update(now) {
     frame = 0;
     if (!layout || document.hidden || reduced.matches || forcedColors.matches) return;
-    const { hero: anchor, landing, link, turn } = positions();
+    const { hero: anchor, link, turn } = positions();
     const hero = openingPose(anchor, now);
-    const focal = isVisible(hero) ? hero : isVisible(landing) ? landing : null;
     const panelY = layout.panel.y - scrollY;
     const panelVisible = panelY < layout.height && panelY + layout.panel.height > 0;
-    const connected = connectionVisible(landing ?? hero, link);
-    const continuous = panelVisible || focal || connected;
+    const connected = connectionVisible(hero, link);
+    const continuous = panelVisible || isVisible(hero) || connected;
     const delta = previous ? Math.max(1, Math.min(40, now - previous)) : 16;
     if (pointer?.expires && now >= pointer.expires) pointer = null;
     if (continuous) time += delta;
     const movingHero = floating(hero);
-    const movingLanding = floating(landing);
     const localPointer = pose => !opening && pointer && isVisible(pose)
       ? { x: (pointer.x - pose.x) / pose.r, y: (pointer.y - pose.y) / pose.r } : null;
     if (continuous) {
       const heroPointer = localPointer(movingHero);
-      const landingPointer = localPointer(movingLanding);
-      positionPointer(landingField, landingPointer, delta);
-      positionPointer(heroField, landingField.active ? null : heroPointer, delta);
-      const interaction = landingField.active ? landingPointer : heroField.active ? heroPointer : null;
+      positionPointer(heroField, heroPointer, delta);
+      const interaction = heroField.active ? heroPointer : null;
       connectionTime = connected && link > .86 ? connectionTime + delta : 0;
       const ambient = { x: .77 * Math.sin(time * .00083 - 1.05), y: .59 * Math.sin(time * .00118 - .43) };
       const resting = .30 + .08 * Math.sin(time * .0012);
@@ -623,7 +609,6 @@ import { createLiquidBackground } from './orbit-background.js';
       energy = 0;
       fadingInteraction = false;
       positionPointer(heroField, null, 1000);
-      positionPointer(landingField, null, 1000);
       connectionTime = 0;
     }
 
@@ -632,9 +617,8 @@ import { createLiquidBackground } from './orbit-background.js';
     if (panelVisible) {
       paintBackground(ctx, { ...layout.panel, y: panelY }, time, wave, wave.strength);
     }
-    drawConnections(movingLanding ?? movingHero, link);
+    drawConnections(movingHero, link);
     drawGlobe(movingHero, rotation + turn, layout.height, heroField, delta);
-    if (movingLanding) drawGlobe(movingLanding, rotation + turn, layout.height, landingField, delta);
     previous = continuous ? now : 0;
     if (continuous) schedule();
   }
@@ -652,22 +636,41 @@ import { createLiquidBackground } from './orbit-background.js';
     if (opening && (event.key === 'Tab' || event.key === 'Escape')) finishOpening();
   });
   addEventListener('pointermove', event => {
-    if (event.pointerType === 'touch' || reduced.matches) return;
-    pointer = { x: event.clientX, y: event.clientY };
+    if (reduced.matches) return;
+    if (event.pointerType === 'touch') {
+      if (pointer?.id !== event.pointerId) return;
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      pointer.moved ||= Math.hypot(pointer.x - pointer.startX, pointer.y - pointer.startY) > 8;
+    } else {
+      if (pointer?.id !== undefined) return;
+      pointer = { x: event.clientX, y: event.clientY };
+    }
     schedule();
   }, { passive: true });
   addEventListener('pointerout', event => {
-    if (event.relatedTarget || pointer?.expires) return;
+    if (event.pointerType === 'touch' || event.relatedTarget || pointer?.id !== undefined) return;
     pointer = null;
     schedule();
   });
   function touchGlobe(event) {
-    if (event.pointerType !== 'touch' || reduced.matches) return;
-    pointer = { x: event.clientX, y: event.clientY, expires: performance.now() + 1050 };
+    if (event.pointerType !== 'touch' || !event.isPrimary || !layout || reduced.matches || forcedColors.matches) return;
+    const pose = floating(positions().hero);
+    const { clientX: x, clientY: y } = event;
+    if (!isVisible(pose) || Math.hypot(x - pose.x, y - pose.y) > pose.r * pointerReach) return;
+    pointer = { x, y, id: event.pointerId, startX: x, startY: y, moved: false };
+    schedule();
+  }
+  function endTouch(event) {
+    if (pointer?.id !== event.pointerId) return;
+    pointer = event.type === 'pointerup' && !pointer.moved
+      ? { x: pointer.x, y: pointer.y, expires: performance.now() + 220 } : null;
     schedule();
   }
   stage.addEventListener('pointerdown', touchGlobe, { passive: true });
   hub.addEventListener('pointerdown', touchGlobe, { passive: true });
+  addEventListener('pointerup', endTouch, { passive: true });
+  addEventListener('pointercancel', endTouch, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (opening) finishOpening();
