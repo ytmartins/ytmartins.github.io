@@ -66,6 +66,7 @@ import { createLiquidBackground } from './orbit-background.js';
   let connectionTime = 0;
   let rotation = .36;
   let energy = 0;
+  let fadingInteraction = false;
   let pointer = null;
   const root = document.documentElement;
   let opening = root.classList.contains('orbit-opening');
@@ -218,7 +219,7 @@ import { createLiquidBackground } from './orbit-background.js';
       anchor: { x: 0, y: 0 },
       surface: { x: 0, y: 0 },
       stretch: { x: 0, y: 0 },
-      release: null,
+      releaseAge: 0,
       active: false,
       strength: 0,
       links: [],
@@ -238,19 +239,9 @@ import { createLiquidBackground } from './orbit-background.js';
       field.surface.x = mix(field.surface.x, point.x, follow);
       field.surface.y = mix(field.surface.y, point.y, follow);
       field.anchor = point;
-      field.release = null;
+      field.releaseAge = 0;
     } else {
-      if (field.active && point) {
-        const reach = Math.min(1, 1.20 / Math.hypot(point.x, point.y));
-        const dx = point.x * reach - field.anchor.x;
-        const dy = point.y * reach - field.anchor.y;
-        const travel = Math.min(1, .26 / Math.hypot(dx, dy));
-        field.release = { x: field.anchor.x + dx * travel, y: field.anchor.y + dy * travel };
-      }
-      if (field.release) {
-        field.anchor.x = mix(field.anchor.x, field.release.x, ease);
-        field.anchor.y = mix(field.anchor.y, field.release.y, ease);
-      }
+      if (previousStrength) field.releaseAge += delta;
       field.stretch.x *= 1 - ease;
       field.stretch.y *= 1 - ease;
     }
@@ -334,6 +325,8 @@ import { createLiquidBackground } from './orbit-background.js';
     const beat = Math.cos(20 * seconds);
     const swing = Math.sin(20 * seconds) / 20;
     const contactDecay = Math.exp(-delta / 135);
+    const releaseAge = field?.releaseAge ?? 0;
+    const returnDecay = Math.exp(-delta / 75) * (75 + releaseAge) / (75 + Math.max(0, releaseAge - delta));
     const surface = field?.surface;
     const reach = surface ? Math.hypot(surface.x, surface.y) : 0;
     const normalX = reach > 0 ? surface.x / reach : 0;
@@ -380,7 +373,7 @@ import { createLiquidBackground } from './orbit-background.js';
         const position = index * particleStateSize;
         // Released points draw toward the globe center before settling on the rotating shell.
         const contact = mix(.30, 1, edge) * clamp(.9 * influence + .3 * gather + .55 * patch + .55 * joining);
-        const recentContact = Math.max(contact, mix(contact, field.offsets[position + 4], contactDecay));
+        const recentContact = field.active ? Math.max(contact, mix(contact, field.offsets[position + 4], contactDecay)) : 0;
         field.offsets[position + 4] = recentContact;
         const inward = .29 * (recentContact - contact) * smooth((radialDistance - .12) / .66) / Math.max(.12, radialDistance);
         const targetX = dx * push + normalX * lift - normalY * slide + field.stretch.x * stretch - x * inward;
@@ -391,16 +384,18 @@ import { createLiquidBackground } from './orbit-background.js';
         const vy = field.offsets[position + 3];
         const diffX = px - targetX;
         const diffY = py - targetY;
-        offsetX = targetX + decay * ((beat + 15 * swing) * diffX + swing * vx);
-        offsetY = targetY + decay * ((beat + 15 * swing) * diffY + swing * vy);
+        // Once released, ease back along the current offset with no spring overshoot.
+        offsetX = field.active ? targetX + decay * ((beat + 15 * swing) * diffX + swing * vx) : px * returnDecay;
+        offsetY = field.active ? targetY + decay * ((beat + 15 * swing) * diffY + swing * vy) : py * returnDecay;
         field.offsets[position] = offsetX;
         field.offsets[position + 1] = offsetY;
-        field.offsets[position + 2] = decay * ((beat - 15 * swing) * vx - 625 * swing * diffX);
-        field.offsets[position + 3] = decay * ((beat - 15 * swing) * vy - 625 * swing * diffY);
+        field.offsets[position + 2] = field.active ? decay * ((beat - 15 * swing) * vx - 625 * swing * diffX) : 0;
+        field.offsets[position + 3] = field.active ? decay * ((beat - 15 * swing) * vy - 625 * swing * diffY) : 0;
         const shiftedGap = Math.hypot(dx + offsetX, dy + offsetY);
         const lipDistance = Math.abs(shiftedGap - lipRadius);
         const contour = smooth(1 - lipDistance / mix(.177, .132, edge)) * smooth((.55 - localGap) / .31);
-        light = mix(light, 1, clamp(aperture * face * contour * .85 + convergence * .70));
+        const localLight = field.active ? aperture * face * contour * .85 + convergence * .70 : response * face * contour * .40;
+        light = mix(light, 1, clamp(localLight));
         exposure = 1 - aperture * .86 * smooth((openingRadius * .89 - shiftedGap) / (openingRadius * .64));
       }
       const drift = light * .068 * detail * rim * (1 - response * .80);
@@ -596,20 +591,24 @@ import { createLiquidBackground } from './orbit-background.js';
       positionPointer(heroField, landingField.active ? null : heroPointer, delta);
       const interaction = landingField.active ? landingPointer : heroField.active ? heroPointer : null;
       connectionTime = connected && link > .86 ? connectionTime + delta : 0;
-      const resting = .30 + .08 * Math.sin(time * .0012);
-      energy = mix(energy, interaction ? 1 : resting, 1 - Math.exp(-delta / (interaction ? 58 : 420)));
       const ambient = { x: .77 * Math.sin(time * .00083 - 1.05), y: .59 * Math.sin(time * .00118 - .43) };
-      const releasing = landingField.strength > heroField.strength ? landingField : heroField;
-      const linger = smooth(releasing.strength);
-      const target = interaction ?? {
-        x: mix(ambient.x, releasing.anchor.x, linger),
-        y: mix(ambient.y, releasing.anchor.y, linger),
-      };
-      for (let index = 0; index < wake.length; index++) {
-        const lead = index === 0 ? target : wake[index - 1];
-        const ease = 1 - Math.exp(-delta / drag[index]);
-        wake[index].x = mix(wake[index].x, lead.x, ease);
-        wake[index].y = mix(wake[index].y, lead.y, ease);
+      const resting = .30 + .08 * Math.sin(time * .0012);
+      if (interaction) fadingInteraction = true;
+      if (fadingInteraction && !interaction) {
+        // Let the last lit area fade before restarting the ambient sweep elsewhere.
+        energy *= Math.exp(-delta / 130);
+        if (energy < .012) {
+          fadingInteraction = false;
+          wake.forEach(point => Object.assign(point, ambient));
+        }
+      } else {
+        energy = mix(energy, interaction ? 1 : resting, 1 - Math.exp(-delta / (interaction ? 58 : 420)));
+        for (let index = 0; index < wake.length; index++) {
+          const lead = index === 0 ? interaction ?? ambient : wake[index - 1];
+          const ease = 1 - Math.exp(-delta / drag[index]);
+          wake[index].x = mix(wake[index].x, lead.x, ease);
+          wake[index].y = mix(wake[index].y, lead.y, ease);
+        }
       }
       rotation += delta * .00022;
       const bend = heroField.active && movingHero.r > layout.hero.r * .68;
@@ -622,6 +621,7 @@ import { createLiquidBackground } from './orbit-background.js';
       wave.strength = mix(wave.strength, bend ? 1 : 0, 1 - Math.exp(-delta / (bend ? 124 : 470)));
     } else {
       energy = 0;
+      fadingInteraction = false;
       positionPointer(heroField, null, 1000);
       positionPointer(landingField, null, 1000);
       connectionTime = 0;
