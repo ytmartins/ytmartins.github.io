@@ -1,11 +1,18 @@
 # yurimartins.dev
 
-Personal portfolio with a Home page and a bilingual Resume. Plain HTML/CSS/JS,
-local approved assets, no runtime dependencies, analytics, backend or active email.
+[Live portfolio](https://yurimartins.dev/) · [Bilingual résumé](https://yurimartins.dev/resume/)
+
+Yuri Martins's personal portfolio pairs an interactive homepage with a résumé in Portuguese and English. The build generates and validates a downloadable PDF for each language.
+
+## Site features
+
+- The homepage's orbital animation responds to pointer and touch input. Scrolling connects the animation to four areas of expertise. The site shows static illustrations when reduced motion is enabled.
+- The résumé lets readers switch languages and download the corresponding PDF. Its source is [resume/index.html](resume/index.html).
+- The site uses plain HTML, CSS, and JavaScript with local assets. A contact button on the homepage copies the email address.
 
 ## Local development
 
-Node 24 and pnpm 11.25.0:
+Use Node.js 24, pnpm 11.25.0, and Python 3.12.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -16,33 +23,21 @@ pnpm test
 pnpm preview
 ```
 
-Preview: http://127.0.0.1:4173. Tests start a separate local HTTP server on a free port.
-This Windows workspace uses `.cache/browsers`; set PLAYWRIGHT_BROWSERS_PATH to
-that absolute directory before installing to reuse that cache. QA detects it.
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173) to preview the build. Tests start their own local server on a free port. To reuse a browser cache on Windows, set `PLAYWRIGHT_BROWSERS_PATH` to its absolute path before running the Playwright install. Set `RESUME_PYTHON` to choose a specific Python executable for the résumé build.
 
-`node scripts/performance.mjs` runs Lighthouse mobile on both pages (stop other
-preview/QA servers first). Generated reports/screenshots are ignored under
-`docs/qa/generated`; selected review evidence is tracked under `docs/qa`.
+The build writes the site to `dist/` and places the résumé and its PDFs in `dist/resume/`. It stops if PDF validation fails. Run `node scripts/performance.mjs` for mobile Lighthouse checks on both pages after stopping other preview or QA servers. Generated QA reports and screenshots are stored in `docs/qa/generated/`.
 
-- [Migration inventory](docs/MIGRATION.md)
-- [Acceptance evidence](docs/qa/REPORT.md)
-- [Gated release to https://yurimartins.dev/](docs/RELEASE.md)
-- [Untouched approved handoff](codex_handoff/README_START_HERE.md)
+## Validation and deployment
 
-Only `dist/` is publishable. Edit the Portuguese and English resume in
-`resume/index.html`. The build prints and validates both PDFs, then assembles
-the page and downloads in `dist/resume/`. The build stops if the generated PDFs
-fail validation. For a specific Python executable, set `RESUME_PYTHON`.
+[Static validation](.github/workflows/validate.yml) builds and tests pull requests targeting `master` and pushes to `master`. To publish an approved build, manually run [Approved manual Pages release](.github/workflows/pages.yml) from `master`. The workflow publishes `dist/` to GitHub Pages.
 
-Validation targets `master`. Deployment uses the manually dispatched Pages workflow on `master`.
+## Project records
 
-Historical Kagerou/Ravenbright attribution: Ariq N / Ravenbright, Apache-2.0.
-Prior template/dependencies were removed after audit; LICENSE.md/history remain.
-Supplied portrait and brand/illustration assets retain their existing ownership;
-the historical template license does not grant rights to personal identity assets.
+- [Acceptance and QA evidence](docs/qa/REPORT.md)
+- [Watercolor storyboard for the earlier homepage](docs/HERO_STORYBOARD.md)
+- [Migration inventory](docs/MIGRATION.md) and [original release plan](docs/RELEASE.md)
+- [Original project handoff](codex_handoff/README_START_HERE.md)
 
-## Orbital homepage
+## Credits
 
-The opening animates a single sphere, with nearby particles reacting to the pointer or touch. Scrolling connects the sphere to the four areas of expertise. Reduced motion shows static illustrations and immediate copy. Run `pnpm test` for the production build checks.
-
-The [watercolor storyboard](docs/HERO_STORYBOARD.md) records the earlier case study.
+The earlier Kagerou template is credited to Ariq N / Ravenbright under [Apache-2.0](LICENSE.md). Portrait, brand, and illustration assets retain their respective ownership.
