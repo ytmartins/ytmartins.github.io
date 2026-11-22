@@ -299,6 +299,7 @@ a:focus-visible,
 }
 
 .page section + section { margin-top: 18px; }
+.page + .page section + section { margin-top: 12px; }
 
 .page h2 {
   margin: 0 0 8px;
