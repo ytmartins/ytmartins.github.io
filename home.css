@@ -48,7 +48,40 @@ body.page-home {
   4.2%, 20% { opacity: 1; transform: translateY(0) skewY(0); }
   24.2%, 100% { opacity: 0; transform: translateY(-.48em) skewY(2deg); }
 }
-.top-links a, .socials a { color: var(--muted); }
+.top-links a, .socials a, .email-copy { color: var(--muted); }
+.email-copy {
+  display: inline-grid;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.email-copy:hover, .email-copy:focus-visible { border-bottom-color: var(--accent); color: var(--accent); }
+.email-copy-label { grid-area: 1 / 1; text-align: left; white-space: nowrap; transition: opacity 140ms ease; }
+.email-copy-icons { position: relative; display: inline-block; }
+.email-copy-icons > * { transition: opacity 140ms ease; }
+.email-copy-icons svg { position: absolute; top: 50%; left: 0; width: 14px; height: 14px; transform: translateY(-50%); }
+.email-copy-placeholder { visibility: hidden; }
+.email-copy-check { color: #2e6b34; }
+.email-copy-label + .email-copy-label,
+.email-copy-symbol,
+.email-copy[data-state="copying"] .email-copy-arrow,
+.email-copy[data-state="copied"] .email-copy-arrow,
+.email-copy[data-state="copied"] .email-copy-label:first-child { opacity: 0; }
+.email-copy[data-state="copying"] .email-copy-symbol,
+.email-copy[data-state="copied"] .email-copy-label + .email-copy-label { opacity: 1; }
+.email-copy-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (hover: hover) {
+  .email-copy:not([data-state]):hover .email-copy-arrow { opacity: 0; }
+  .email-copy:not([data-state]):hover .email-copy-symbol { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .email-copy-label, .email-copy-icons > * { transition: none; }
+}
 .top-links a.current::after { background: var(--energy); }
 .header-cta { border-color: var(--stroke); }
 .header-cta-compact { display: none; }
@@ -202,6 +235,9 @@ button:focus-visible, a:focus-visible { outline-color: var(--accent); }
 .principles { background: var(--energy) top / 100% 1px no-repeat; padding-top: 15px; }
 .principle-num { border-color: var(--stroke); }
 .contact-footer { border-top: 1px solid var(--stroke); background: linear-gradient(105deg, transparent 55%, #e9f5ee 92%, #f7f4d9); }
+@media (min-width: 641px) {
+  .contact-footer .learning-credential { margin-inline-start: auto; }
+}
 
 @media (max-width: 920px) {
   .hero-grid, .identity-inner, .approach-row { grid-template-columns: 1fr; }

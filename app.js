@@ -2,6 +2,42 @@
   const $ = (q, root=document) => root.querySelector(q);
   const $$ = (q, root=document) => [...root.querySelectorAll(q)];
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const emailButton = $('.email-copy');
+  if (emailButton) {
+    const address = emailButton.dataset.email;
+    const status = $('.email-copy-status', emailButton);
+    let attempt = 0;
+    let feedbackTimer;
+
+    const reset = () => {
+      attempt++;
+      clearTimeout(feedbackTimer);
+      delete emailButton.dataset.state;
+      status.textContent = '';
+    };
+
+    emailButton.addEventListener('click', async () => {
+      reset();
+      const current = attempt;
+      const started = performance.now();
+      emailButton.dataset.state = 'copying';
+      try {
+        await navigator.clipboard.writeText(address);
+      } catch {
+        if (attempt !== current) return;
+        reset();
+        location.href = `mailto:${address}`;
+        return;
+      }
+      if (attempt !== current) return;
+      feedbackTimer = setTimeout(() => {
+        emailButton.dataset.state = 'copied';
+        status.textContent = 'Email address copied';
+        feedbackTimer = setTimeout(reset, 1800);
+      }, Math.max(0, 220 - (performance.now() - started)));
+    });
+    addEventListener('pagehide', reset);
+  }
   const menuButton = $('#menuButton');
   const nav = $('#siteNav');
   if (menuButton && nav) {
