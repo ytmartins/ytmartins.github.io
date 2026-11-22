@@ -1,6 +1,6 @@
 # yurimartins.dev
 
-Personal portfolio with a single published Home page. Plain HTML/CSS/JS,
+Personal portfolio with a Home page and a bilingual Resume. Plain HTML/CSS/JS,
 local approved assets, no runtime dependencies, analytics, backend or active email.
 
 ## Local development
@@ -10,6 +10,7 @@ Node 24 and pnpm 11.25.0:
 ```sh
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium firefox webkit
+python -m pip install -r scripts/resume-requirements.txt
 pnpm run build
 pnpm test
 pnpm preview
@@ -28,8 +29,10 @@ preview/QA servers first). Generated reports/screenshots are ignored under
 - [Gated release to https://yurimartins.dev/](docs/RELEASE.md)
 - [Untouched approved handoff](codex_handoff/README_START_HERE.md)
 
-Only `dist/` is publishable. The build copies an allowlist of the Home page, CSS, JS
-and eight assets; docs, screenshots, reference material and tooling stay out.
+Only `dist/` is publishable. Edit the Portuguese and English resume in
+`resume/index.html`. The build prints and validates both PDFs, then assembles
+the page and downloads in `dist/resume/`. The build stops if the generated PDFs
+fail validation. For a specific Python executable, set `RESUME_PYTHON`.
 
 Validation targets `master`. Deployment uses the manually dispatched Pages workflow on `master`.
 
