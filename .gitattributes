@@ -1,5 +1,3 @@
 * text=auto
 *.png binary
 *.webp binary
-# Preserve authoritative handoff byte hashes across operating systems.
-codex_handoff/** -text
